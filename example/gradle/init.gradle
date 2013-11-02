@@ -1,0 +1,8 @@
+allprojects {
+    buildscript {
+        repositories { mavenCentral() }
+        dependencies {
+            classpath 'se.transmode.gradle:gradle-docker:0.1'
+        }
+    }
+}

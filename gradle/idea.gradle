@@ -1,0 +1,8 @@
+apply plugin: 'idea'
+
+idea {
+    module {
+        testSourceDirs += file('src/integTest/groovy')
+        testSourceDirs += file('src/integTest/resources')
+    }
+}

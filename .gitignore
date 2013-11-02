@@ -1,0 +1,8 @@
+.gradle/
+.idea/
+build/
+gradle-docker.iml
+gradle-docker.ipr
+gradle-docker.iws
+out
+*~

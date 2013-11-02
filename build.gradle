@@ -1,0 +1,55 @@
+apply plugin: 'groovy'
+
+group = 'se.transmode.gradle'
+version = '1.0'
+
+buildscript {
+    // inspired by https://github.com/Netflix/gradle-template
+    apply from: file('gradle/buildscript.gradle'), to: buildscript
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply from: file('gradle/license.gradle')
+apply from: file('gradle/idea.gradle')
+
+sourceSets {
+    integTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        groovy {
+            srcDir 'src/integTest/groovy'
+        }
+        resources {
+            srcDir 'src/integTest/resources'
+        }
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    testCompile 'junit:junit-dep:4.11'
+    testCompile 'org.hamcrest:hamcrest-all:1.3'
+}
+
+task integTest(type: Test) {
+    group = 'verification'
+    description = 'Runs the integration tests.'
+    testClassesDir = sourceSets.integTest.output.classesDir
+    classpath = sourceSets.integTest.runtimeClasspath
+
+}
+
+// run integration tests after unit tests if both are scheduled for execution
+integTest.mustRunAfter test
+
+check.dependsOn(integTest)
