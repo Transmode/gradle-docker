@@ -79,8 +79,8 @@ class DockerTask extends DefaultTask {
 
     List getPreamble() {
         def preamble = []
-        preamble.add("FROM ${baseImage}")
-        preamble.add("MAINTAINER ${maintainer}")
+        preamble.add("FROM ${-> baseImage}")
+        preamble.add("MAINTAINER ${-> maintainer}")
         return preamble
     }
 
@@ -118,20 +118,20 @@ class DockerTask extends DefaultTask {
         }
 
         if (registry) {
-            tag = "${registry}/${applicationName}"
+            tag = "${-> registry}/${-> applicationName}"
         }
         else {
-            tag = "${project.group}/${applicationName}"
+            tag = "${-> project.group}/${-> applicationName}"
         }
 
         if (!dryRun) {
-            def buildCmdLine = "${dockerBinary} build -t ${tag} ${stageDir}"
+            def buildCmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
             def buildProc = buildCmdLine.execute()
             buildProc.waitFor()
             println buildProc.in.text
 
             if (push) {
-                def pushCmdLine = "${dockerBinary} push ${tag}"
+                def pushCmdLine = "${-> dockerBinary} push ${-> tag}"
                 def pushProc = pushCmdLine.execute()
                 pushProc.waitFor()
                 println pushProc.in.text

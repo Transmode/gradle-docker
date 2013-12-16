@@ -84,7 +84,7 @@ class DockerPlugin implements Plugin<Project> {
     private DockerPluginExtension createExtension(Project project) {
         def extension = project.extensions.create("docker", DockerPluginExtension)
         extension.with {
-            maintainer = project.group
+            maintainer = "unknown"
             dockerBinary = "docker"
             baseImage = BASE_IMAGE
             baseImageJava = BASE_IMAGE_JAVA
