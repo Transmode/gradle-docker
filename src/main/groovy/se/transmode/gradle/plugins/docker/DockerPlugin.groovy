@@ -30,6 +30,7 @@ class DockerPlugin implements Plugin<Project> {
     private static final String BASE_IMAGE_JAVA6 = "fkautz/java6-jre"
     private static final String BASE_IMAGE_JAVA7 = "nickstenning/java7"
     private static final String BASE_IMAGE_JAVA = BASE_IMAGE_JAVA6
+    private static final String DOCKER_BINARY = "docker"
 
     DockerPluginExtension extension
 
@@ -85,7 +86,7 @@ class DockerPlugin implements Plugin<Project> {
         def extension = project.extensions.create("docker", DockerPluginExtension)
         extension.with {
             maintainer = "unknown"
-            dockerBinary = "docker"
+            dockerBinary = DOCKER_BINARY
             baseImage = BASE_IMAGE
             baseImageJava = BASE_IMAGE_JAVA
             baseImageJava16 = BASE_IMAGE_JAVA6

@@ -16,9 +16,13 @@
 package se.transmode.gradle.plugins.docker
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
 class DockerTask extends DefaultTask {
+
+    private static Logger logger = Logging.getLogger(DockerTask)
 
     // full path to the docker executable
     String dockerBinary
@@ -125,18 +129,29 @@ class DockerTask extends DefaultTask {
         }
 
         if (!dryRun) {
-            def buildCmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
-            def buildProc = buildCmdLine.execute()
-            buildProc.waitFor()
-            println buildProc.in.text
+            println buildDockerImage(tag)
 
             if (push) {
-                def pushCmdLine = "${-> dockerBinary} push ${-> tag}"
-                def pushProc = pushCmdLine.execute()
-                pushProc.waitFor()
-                println pushProc.in.text
+                println pushDockerImage(tag)
             }
         }
 
+    }
+
+    private String executeAndWait(GString cmdLine) {
+        logger.info("Executing command '" + cmdLine + "'.")
+        def process = cmdLine.execute()
+        process.waitFor()
+        return process.in.text
+    }
+
+    private String pushDockerImage(String tag) {
+        def cmdLine = "${-> dockerBinary} push ${tag}"
+        return executeAndWait(cmdLine)
+    }
+
+    private String buildDockerImage(String tag) {
+        def cmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
+        return executeAndWait(cmdLine)
     }
 }
