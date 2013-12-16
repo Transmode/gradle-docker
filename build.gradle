@@ -14,6 +14,7 @@ repositories {
 
 apply from: file('gradle/license.gradle')
 apply from: file('gradle/idea.gradle')
+apply from: file('gradle/maven.gradle')
 
 sourceSets {
     integTest {
@@ -53,3 +54,19 @@ task integTest(type: Test) {
 integTest.mustRunAfter test
 
 check.dependsOn(integTest)
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}

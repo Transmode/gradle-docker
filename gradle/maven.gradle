@@ -1,0 +1,60 @@
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+
+signing {
+    sign configurations.archives
+}
+
+
+uploadArchives {
+    dependsOn signArchives
+    doFirst {
+        repositories.mavenDeployer {
+            uniqueVersion = false
+            beforeDeployment { org.gradle.api.artifacts.maven.MavenDeployment deployment -> signing.signPom(deployment) }
+
+            //repository(url: "file://localhost/${rootProject.rootDir}/repo")
+
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+                name 'gradle-docker'
+                packaging 'jar'
+                description 'Gradle plugin to build und publish Docker images from the build script.'
+                url 'https://github.com/Transmode/gradle-docker'
+                inceptionYear '2013'
+            
+
+                scm {
+                    url 'scm:git://github.com/Transmode/gradle-docker.git'
+                    connection 'scm:git@github.com/Transmode/gradle-docker.git'
+                    developerConnection 'scm:git@github.com/Transmode/gradle-docker.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id 'mattgruter'
+                        name 'Matthias Grüter'
+                        email 'matthias.gruter@transmode.com'
+                        roles{ role 'Developer' }
+                    }
+                }
+            }
+        }
+    }
+}
+
