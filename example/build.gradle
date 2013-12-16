@@ -2,6 +2,13 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'docker'
 
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.0'
+    }
+}
+
 sourceCompatibility = 1.7
 group = 'example'
 version = '1.0'
@@ -13,6 +20,5 @@ dependencies {
 }
 
 distDocker {
-    dryRun true
     exposePort 8080
 }
