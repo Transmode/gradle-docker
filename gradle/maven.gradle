@@ -1,60 +1,76 @@
+/**
+ * Maven configuration provided by Netflix' gradle-temmplate project
+ * (https://github.com/Netflix/gradle-template) with minor modifications.
+ */
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-
 signing {
+    required { gradle.taskGraph.hasTask(uploadMavenCentral) }
     sign configurations.archives
 }
 
+/**
+ * Publishing to Maven Central example provided fromhttp://jedicoder.blogspot.com/2011/11/automated-gradle-project-deployment-to.html.
+ * Using custom upload task "uploadMavenCentral" to make it clear that we are
+ * publishing to external Maven Central repo.
+ */
+task uploadMavenCentral(type: Upload, dependsOn: signArchives) {
+    group = "Upload"
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { signing.signPom(it) }
 
-uploadArchives {
-    dependsOn signArchives
-    doFirst {
-        repositories.mavenDeployer {
-            uniqueVersion = false
-            beforeDeployment { org.gradle.api.artifacts.maven.MavenDeployment deployment -> signing.signPom(deployment) }
+        // To test deployment locally, use the following instead of oss.sonatype.org
+        //repository(url: "file://localhost/${rootProject.rootDir}/repo")
 
-            //repository(url: "file://localhost/${rootProject.rootDir}/repo")
+        def sonatypeUsername = rootProject.hasProperty('sonatypeUsername') ? rootProject.sonatypeUsername : ''
+        def sonatypePassword = rootProject.hasProperty('sonatypePassword') ? rootProject.sonatypePassword : ''
 
-            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+
+        // Prevent datastamp from being appending to artifacts during deployment
+        uniqueVersion = false
+
+        pom.project {
+            name 'gradle-docker'
+            packaging 'jar'
+            description 'Gradle plugin to build und publish Docker images from the build script.'
+            url 'https://github.com/Transmode/gradle-docker'
+            inceptionYear '2013'
+
+
+            scm {
+                url 'scm:git://github.com/Transmode/gradle-docker.git'
+                connection 'scm:git@github.com/Transmode/gradle-docker.git'
+                developerConnection 'scm:git@github.com/Transmode/gradle-docker.git'
             }
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
             }
 
-            pom.project {
-                name 'gradle-docker'
-                packaging 'jar'
-                description 'Gradle plugin to build und publish Docker images from the build script.'
-                url 'https://github.com/Transmode/gradle-docker'
-                inceptionYear '2013'
-            
-
-                scm {
-                    url 'scm:git://github.com/Transmode/gradle-docker.git'
-                    connection 'scm:git@github.com/Transmode/gradle-docker.git'
-                    developerConnection 'scm:git@github.com/Transmode/gradle-docker.git'
+            developers {
+                developer {
+                    id 'mattgruter'
+                    name 'Matthias Grüter'
+                    email 'matthias.gruter@transmode.com'
+                    roles { role 'Developer' }
                 }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id 'mattgruter'
-                        name 'Matthias Grüter'
-                        email 'matthias.gruter@transmode.com'
-                        roles{ role 'Developer' }
-                    }
-                }
+            }
+            issueManagement {
+                system 'github'
+                url "https://github.com/Transmode/gradle-docker/issues"
             }
         }
     }
 }
-
