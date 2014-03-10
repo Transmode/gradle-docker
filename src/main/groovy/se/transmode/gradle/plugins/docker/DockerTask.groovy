@@ -73,6 +73,14 @@ class DockerTask extends DefaultTask {
         instructions.add("ADD ${copySpec} ${destPath}")
     }
 
+    void workingDir(String wd) {
+        instructions.add("WORKDIR ${wd}")
+    }
+
+    void instruction(String cmd, String value) {
+        instructions.add("${cmd} ${value}")
+    }
+
     void runCommand(String command) {
         instructions.add("RUN ${command}")
     }
