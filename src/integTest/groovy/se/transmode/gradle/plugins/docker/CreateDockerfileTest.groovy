@@ -43,7 +43,7 @@ class CreateDockerfileTest {
         task.runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
 
         def expectedDockerFile = this.getClass().getResource("nginx.Dockerfile").text.trim()
-        def actualDockerFile = task.buildDockerFile().join("\n")
+        def actualDockerFile = task.buildDockerFile().join(System.getProperty('line.separator'))
 
         assertThat actualDockerFile, is(equalTo(expectedDockerFile))
     }
