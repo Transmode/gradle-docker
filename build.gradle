@@ -15,6 +15,11 @@ apply from: file('gradle/license.gradle')
 apply from: file('gradle/idea.gradle')
 apply from: file('gradle/maven.gradle')
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
+
+
 def getVersionName() {
     def stdout = new ByteArrayOutputStream()
     exec {
