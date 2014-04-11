@@ -11,7 +11,7 @@ signing {
 }
 
 /**
- * Publishing to Maven Central example provided fromhttp://jedicoder.blogspot.com/2011/11/automated-gradle-project-deployment-to.html.
+ * Publishing to Maven Central example provided from http://jedicoder.blogspot.com/2011/11/automated-gradle-project-deployment-to.html.
  * Using custom upload task "uploadMavenCentral" to make it clear that we are
  * publishing to external Maven Central repo.
  */
