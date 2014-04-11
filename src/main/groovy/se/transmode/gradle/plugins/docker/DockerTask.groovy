@@ -89,6 +89,10 @@ class DockerTask extends DefaultTask {
         instructions.add("EXPOSE ${port}")
     }
 
+    void volume(String... paths) {
+        instructions.add('VOLUME ["' + paths.join('", "') + '"]')
+    }
+
     List getPreamble() {
         def preamble = []
         preamble.add("FROM ${-> baseImage}")
