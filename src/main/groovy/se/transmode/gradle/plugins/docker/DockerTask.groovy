@@ -89,6 +89,10 @@ class DockerTask extends DefaultTask {
         instructions.add("EXPOSE ${port}")
     }
 
+    void setEnvironment(String key, String value) {
+        instructions.add("ENV ${key} ${value}")
+    }
+
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
