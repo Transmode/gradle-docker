@@ -77,7 +77,7 @@ class DockerTask extends DefaultTask {
         instructions.add("WORKDIR ${wd}")
     }
 
-    void instruction(String cmd, String value) {
+    void addInstruction(String cmd, String value) {
         instructions.add("${cmd} ${value}")
     }
 
