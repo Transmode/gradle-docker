@@ -27,7 +27,7 @@ The following example builds a docker image for the popular reverse proxy nginx.
     buildscript {
         repositories { mavenCentral() }
         dependencies {
-            classpath 'se.transmode.gradle:gradle-docker:1.0'
+            classpath 'se.transmode.gradle:gradle-docker:1.1'
         }
     }
     
