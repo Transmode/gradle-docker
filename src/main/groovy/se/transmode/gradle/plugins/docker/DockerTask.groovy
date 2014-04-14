@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+import com.google.common.io.Files
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -98,13 +99,50 @@ class DockerTask extends DefaultTask {
             from file
             into stageDir
         }
-        instructions.add("ADD ${file.name} /")
+        addFileFromStageDir(file)
     }
 
     void addFile(Closure copySpec) {
+
+        //@fixme: don't actually do the work here. add it to backlog and execute in @TaskAction method
         stageDir.mkdir()
-        project.copy(copySpec)
-        instructions.add("ADD ${copySpec} ${destPath}")
+
+        log.warn("Stage dir: {}", stageDir.toString())
+        final File tarPath = File.createTempFile('add_', '.tar', stageDir)
+        tarPath.delete()
+        File tarFile = createTarArchive(tarPath) {
+            into('/') {
+                with copySpec
+            }
+        }
+        addFileFromStageDir(tarFile)
+    }
+
+    private static File createTarArchive(File tarPath, File dir) {
+        log.warn("Creating tar archive {} from {}", tarPath, dir)
+        new AntBuilder().tar(
+                destfile: tarPath,
+                basedir: dir
+        )
+        return tarPath
+    }
+
+    private File createTarArchive(File tarPath, Closure copySpec) {
+        final File tmpDir = Files.createTempDir()
+        project.copy {
+            with copySpec
+            into tmpDir
+        }
+        return createTarArchive(tarPath, tmpDir)
+    }
+
+    private void addFileFromStageDir(File file) {
+        logger.info("ADD ${file} /")
+        instructions.add("ADD ${file.name} /")
+    }
+
+    private void addArchive(File archive) {
+        addFile(archive)
     }
 
     void workingDir(String wd) {

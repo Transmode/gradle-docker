@@ -3,7 +3,7 @@ apply plugin: 'docker'
 buildscript {
     repositories { mavenLocal(); jcenter() }
     dependencies {
-        classpath 'se.transmode.gradle:gradle-docker:1.2'
+        classpath 'se.transmode.gradle:gradle-docker:1.2-SNAPSHOT'
     }
 }
 
@@ -18,4 +18,9 @@ task nginxDocker(type: Docker) {
     runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
     runCommand "apt-get update"
     runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
+
+    addFile {
+        from 'input'
+        into 'payload'
+    }
 }
