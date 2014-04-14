@@ -23,7 +23,7 @@ task wrapper(type: Wrapper) {
 def getVersionName() {
     def stdout = new ByteArrayOutputStream()
     exec {
-        commandLine 'git', 'describe', '--tags', '--long'
+        commandLine 'git', 'describe', '--tags'
         standardOutput = stdout
     }
     return stdout.toString().trim()
