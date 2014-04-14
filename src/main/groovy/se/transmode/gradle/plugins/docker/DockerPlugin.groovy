@@ -28,8 +28,8 @@ class DockerPlugin implements Plugin<Project> {
 
     private static final String BASE_IMAGE = "ubuntu"
     private static final String BASE_IMAGE_JAVA6 = "fkautz/java6-jre"
-    private static final String BASE_IMAGE_JAVA7 = "nickstenning/java7"
-    private static final String BASE_IMAGE_JAVA = BASE_IMAGE_JAVA6
+    private static final String BASE_IMAGE_JAVA7 = "dockerfile/java"
+    private static final String BASE_IMAGE_JAVA = BASE_IMAGE_JAVA7
     private static final String DOCKER_BINARY = "docker"
 
     DockerPluginExtension extension
