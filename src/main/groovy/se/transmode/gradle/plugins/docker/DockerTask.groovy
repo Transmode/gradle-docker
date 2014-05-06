@@ -32,6 +32,8 @@ class DockerTask extends DefaultTask {
     String applicationName
     // What to tag the created docker image with (default: group/applicationName)
     String tag
+    // Which version to use along with the tag (default: latest)
+    String tagVersion
     // Whether or not to execute docker to build the image (default: false)
     Boolean dryRun
     // Whether or not to push the image into the registry (default: false)
@@ -93,6 +95,14 @@ class DockerTask extends DefaultTask {
         instructions.add("ENV ${key} ${value}")
     }
 
+    void setTagVersion(String version) {
+        tagVersion = version;
+    }
+
+    void setTagVersionToLatest() {
+        tagVersion = null;
+    }
+
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
@@ -142,6 +152,10 @@ class DockerTask extends DefaultTask {
         }
         else {
             tag = "${-> project.group}/${-> applicationName}"
+        }
+
+        if (tagVersion) {
+            tag += ":${-> tagVersion}"
         }
 
         if (!dryRun) {
