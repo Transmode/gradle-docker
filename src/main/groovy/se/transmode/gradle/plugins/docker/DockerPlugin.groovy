@@ -31,6 +31,7 @@ class DockerPlugin implements Plugin<Project> {
     private static final String BASE_IMAGE_JAVA7 = "dockerfile/java"
     private static final String BASE_IMAGE_JAVA = BASE_IMAGE_JAVA7
     private static final String DOCKER_BINARY = "docker"
+    private static final String BASE_IMAGE_JAVA8 = "aglover/java8"
 
     DockerPluginExtension extension
 
@@ -72,6 +73,8 @@ class DockerPlugin implements Plugin<Project> {
                 return extension.baseImageJava16
             case JavaVersion.VERSION_1_7:
                 return extension.baseImageJava17
+            case JavaVersion.VERSION_1_8:
+                return extension.baseImageJava18
             default:
                 return extension.baseImageJava
         }
@@ -91,6 +94,7 @@ class DockerPlugin implements Plugin<Project> {
             baseImageJava = BASE_IMAGE_JAVA
             baseImageJava16 = BASE_IMAGE_JAVA6
             baseImageJava17 = BASE_IMAGE_JAVA7
+            baseImageJava18 = BASE_IMAGE_JAVA8
             registry = ""
         }
         logger.info("Adding docker extension");

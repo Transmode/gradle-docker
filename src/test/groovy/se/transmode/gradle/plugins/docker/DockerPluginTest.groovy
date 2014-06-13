@@ -55,5 +55,6 @@ class DockerPluginTest {
 
         assertThat task.maintainer, is(equalTo(testMaintainer))
     }
+
 }
 
