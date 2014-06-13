@@ -141,8 +141,11 @@ class DockerTask extends DefaultTask {
         if (registry) {
             tag = "${-> registry}/${-> applicationName}"
         }
-        else {
+        else if (project.group) {
             tag = "${-> project.group}/${-> applicationName}"
+        }
+        else {
+            tag = "${-> applicationName}"
         }
 
         if (!dryRun) {
@@ -159,7 +162,7 @@ class DockerTask extends DefaultTask {
         logger.info("Executing command '" + cmdLine + "'.")
         def process = cmdLine.execute()
         process.waitFor()
-        if (process.exitValue() != 0) {
+        if (process.exitValue()) {
            throw new GradleException("docker execution failed\nCommand line [${cmdLine}] returned:\n${process.err.text}")
         }
         return process.in.text
