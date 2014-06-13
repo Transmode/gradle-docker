@@ -16,6 +16,7 @@
 package se.transmode.gradle.plugins.docker
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
@@ -158,6 +159,9 @@ class DockerTask extends DefaultTask {
         logger.info("Executing command '" + cmdLine + "'.")
         def process = cmdLine.execute()
         process.waitFor()
+        if (process.exitValue() != 0) {
+           throw new GradleException("docker execution failed\nCommand line [${cmdLine}] returned:\n${process.err.text}")
+        }
         return process.in.text
     }
 
