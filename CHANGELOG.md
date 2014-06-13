@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.1.1 (2014-06-13)
+* Possible to build without specifying group.
+* Failing gradle build if Docker execution fails.
+
+Many thanks to the contributors:
+* [@Teudimundo](https://github.com/Teudimundo)
+* [@frvi](https://github.com/frvi)
+
+
 ## Version 1.1 (2014-04-11)
 * Support for more Dockerfile commands:
   - WORKDIR
