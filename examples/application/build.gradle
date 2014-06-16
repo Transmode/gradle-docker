@@ -5,7 +5,7 @@ apply plugin: 'docker'
 buildscript {
     repositories { jcenter() }
     dependencies {
-        classpath 'se.transmode.gradle:gradle-docker:1.1.1'
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
 }
 
