@@ -8,7 +8,7 @@ buildscript {
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 apply from: file('gradle/license.gradle')

@@ -1,6 +1,7 @@
 
-repositories { mavenCentral() }
+repositories { jcenter() }
 
 dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.5'
 }
