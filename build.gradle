@@ -1,7 +1,5 @@
 apply plugin: 'groovy'
 
-group = 'se.transmode.gradle'
-
 buildscript {
     // inspired by https://github.com/Netflix/gradle-template
     apply from: file('gradle/buildscript.gradle'), to: buildscript
@@ -18,17 +16,6 @@ apply from: file('gradle/publish.gradle')
 task wrapper(type: Wrapper) {
     gradleVersion = '1.11'
 }
-
-
-def getVersionName() {
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
-version = getVersionName()
 
 sourceSets {
     integTest {
