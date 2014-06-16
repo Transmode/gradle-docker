@@ -22,5 +22,6 @@ class DockerPluginExtension {
     String baseImageJava
     String baseImageJava16
     String baseImageJava17
+    String baseImageJava18
     String registry
 }
