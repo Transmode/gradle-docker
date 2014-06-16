@@ -1,0 +1,21 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+
+    repositories {
+        maven {
+            url 'https://api.bintray.com/maven/transmode/gradle-plugins/gradle-docker'
+            credentials {
+                username = bintrayUser
+                password = bintrayKey
+            }
+        }
+    }
+}
