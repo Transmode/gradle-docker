@@ -1,3 +1,0 @@
-* addFiles should accept copySpec
-* add support for all Dockerfile commands
-* introduce more task types: Dockerfile, BuildImage, PushImage
