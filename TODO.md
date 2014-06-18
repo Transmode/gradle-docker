@@ -13,3 +13,8 @@
 
 ## Base plugin
 * addFiles should accept copySpec
+
+## Docker
+* Use the Java API client for Docker (https://github.com/docker-java/docker-java)
+  - Currently docker-java does not support connecting to the docker host through UNIX sockets
+    (see https://github.com/docker-java/docker-java#support-for-unix-sockets)
