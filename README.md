@@ -18,15 +18,15 @@ By default `distDocker` uses a base image with a Java runtime according to the p
 
 
 ## Stand-alone
-The docker plugin introduces the task type `Docker`. A task of this type can be used to build Docker images. See the [Dockerfile documentation](http://docs.docker.io/en/latest/use/builder/) for information about how docker containers are built.
+The docker plugin introduces the task type `Docker`. A task of this type can be used to build Docker images. See the [Dockerfile documentation](http://docs.docker.com/reference/builder/) for information about how docker containers are built.
 
-The following example builds a docker image for the popular reverse proxy nginx. The image will be tagged with the name `foo/nginx`. The example is taken from the official Dockerfile [examples](http://docs.docker.io/en/latest/use/builder/#dockerfile-examples):
+The following example builds a docker image for the popular reverse proxy nginx. The image will be tagged with the name `foo/nginx`. The example is taken from the official Dockerfile [examples](http://docs.docker.com/reference/builder/#dockerfile-examples):
 
 
     apply plugin: 'docker'
 
     buildscript {
-        repositories { mavenCentral() }
+        repositories { jcenter() }
         dependencies {
             classpath 'se.transmode.gradle:gradle-docker:1.1.1'
         }
