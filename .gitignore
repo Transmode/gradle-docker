@@ -6,3 +6,7 @@ gradle-docker.ipr
 gradle-docker.iws
 out
 *~
+.classpath
+.project
+.settings/
+bin/
