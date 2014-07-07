@@ -20,4 +20,11 @@ class DockerPluginExtension {
     String dockerBinary
     String baseImage
     String registry
+    
+    // Configuration of docker-java API
+    Boolean useApi
+    String serverUrl
+    String username
+    String password
+    String email
 }
