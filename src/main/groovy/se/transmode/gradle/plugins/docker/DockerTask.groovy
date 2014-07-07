@@ -15,6 +15,7 @@
  */
 package se.transmode.gradle.plugins.docker
 
+import org.apache.commons.lang.StringUtils;
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
@@ -258,17 +259,20 @@ class DockerTask extends DefaultTask {
     }
     
     private DockerClient getAPIClient() {
-        // Either create default client or one for configured URL
         DockerClient apiClient
-        if (serverUrl == null) {
+        
+        // Either create default client or one for configured URL
+        def urlStr = "${-> serverUrl}"
+        if (StringUtils.isEmpty(urlStr)) {
             apiClient = new DockerClient()
         } else {
-            apiClient = new DockerClient(serverUrl)
+            apiClient = new DockerClient(urlStr)
         }
         
         // Do we have authentication info?
-        if (username != null) {
-            apiClient.setCredentials(username, password, email)
+        def user = "${-> username}"
+        if (!StringUtils.isEmpty(user)) {
+            apiClient.setCredentials(user, "${-> password}", "${-> email}")
         }
         return apiClient
     }
