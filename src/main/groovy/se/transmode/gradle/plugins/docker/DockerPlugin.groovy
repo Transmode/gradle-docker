@@ -91,7 +91,6 @@ class DockerPlugin implements Plugin<Project> {
     private void applyTaskDefaults(task) {
         task.conventionMapping.with {
             dockerBinary = { extension.dockerBinary }
-            maintainer = { extension.maintainer }
             registry = { extension.registry }
             useApi = { extension.useApi }
             serverUrl = { extension.serverUrl }
