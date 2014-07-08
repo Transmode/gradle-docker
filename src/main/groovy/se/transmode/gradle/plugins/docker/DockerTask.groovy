@@ -78,23 +78,24 @@ class DockerTask extends DefaultTask {
     // Dockerfile instructions (ADD, RUN, etc.)
     def instructions
     // Dockerfile staging area i.e. context dir
-    final File stageDir
+    File stageDir
     
     // Should we use the docker-java API or the docker executable
     Boolean useApi
     // URL for the server (if none if provided we assume the default)
     String serverUrl
-    // Docker repository user name
+    // Docker registry user name
     String username
-    // Docker repository password
+    // Docker registry password
     String password
-    // Docker repository email
+    // Docker registry email
     String email
     
     DockerTask() {
         entryPoint = []
         defaultCommand = []
         instructions = []
+        applicationName = project.name
         stageDir = new File(project.buildDir, "docker")
     }
 
@@ -144,7 +145,11 @@ class DockerTask extends DefaultTask {
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
-
+    
+    void contextDir(String contextDir) {
+        stageDir = new File(stageDir, contextDir)
+    }
+    
     List getPreamble() {
         def preamble = []
         preamble.add("FROM ${determineBaseImage()}")

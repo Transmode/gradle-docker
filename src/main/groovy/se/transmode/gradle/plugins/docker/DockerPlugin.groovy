@@ -74,6 +74,8 @@ class DockerPlugin implements Plugin<Project> {
             dockerBinary = DOCKER_BINARY
             registry = ""
             useApi = Boolean.FALSE
+            serverUrl = ''
+            username = ''
         }
         logger.info("Adding docker extension");
         return extension
