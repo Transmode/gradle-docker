@@ -41,8 +41,27 @@ class DockerTask extends DefaultTask {
     Boolean push
     // Hostname, port of the docker image registry unless Docker index is used
     String registry
-    // Name of image to base new images on (default: 'ubuntu')
+
+    /**
+     * Name of the base docker image
+    */
     String baseImage
+    public String getBaseImage() {
+        return determineBaseImage()
+    }
+
+    /**
+     * Determine the name of the base docker image.
+     *
+     * If the base image is set in the task, return it. Otherwise return the base image
+     * defined in the 'docker' extension. If the extension base image is not set determine
+     * base image based on the 'targetCompatibility' property from the java plugin.
+     *
+     * @return Name of base docker image
+     */
+    private String determineBaseImage() {
+        return baseImage ?: (project[DockerPlugin.EXTENSION_NAME].baseImage ?: JavaBaseImage.imageFor(project.targetCompatibility).imageName)
+    }
 
     // Executable to run when image is instantiated
     def entryPoint
@@ -110,7 +129,7 @@ class DockerTask extends DefaultTask {
 
     List getPreamble() {
         def preamble = []
-        preamble.add("FROM ${-> baseImage}")
+        preamble.add("FROM ${determineBaseImage()}")
         preamble.add("MAINTAINER ${-> maintainer}")
         return preamble
     }

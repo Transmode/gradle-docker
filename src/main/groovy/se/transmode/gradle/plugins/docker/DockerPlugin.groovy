@@ -15,9 +15,8 @@
  */
 package se.transmode.gradle.plugins.docker
 
-import org.gradle.api.JavaVersion
-import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ApplicationPlugin
@@ -26,26 +25,23 @@ class DockerPlugin implements Plugin<Project> {
 
     private static Logger logger = Logging.getLogger(DockerPlugin)
 
-    private static final String BASE_IMAGE = "ubuntu"
-    private static final String BASE_IMAGE_JAVA6 = "fkautz/java6-jre"
-    private static final String BASE_IMAGE_JAVA7 = "dockerfile/java"
-    private static final String BASE_IMAGE_JAVA = BASE_IMAGE_JAVA7
     private static final String DOCKER_BINARY = "docker"
-    private static final String BASE_IMAGE_JAVA8 = "aglover/java8-pier"
+    private static final String MAINTAINER_UNDEFINED = "undefined <email@undefined>"
+    static final String EXTENSION_NAME = "docker"
 
     DockerPluginExtension extension
 
 
     void apply(Project project) {
         this.extension = createExtension(project)
-        addDockerTaskType(project)
-        configureDockerTasks(project)
+    addDockerTaskType(project)
 
         // FIXME: Application plugin must be applied before docker plugin for this to work.
         // FIXME: Check for application AND java plugin
         project.plugins.withType(ApplicationPlugin.class).all {
             addDistDockerTask(project)
         }
+        configureDockerTasks(project)
     }
 
     private void addDistDockerTask(Project project) {
@@ -56,7 +52,6 @@ class DockerPlugin implements Plugin<Project> {
             inputs.files project.distTar
 
             doFirst {
-                baseImage = determineJavaBaseImage(project.targetCompatibility)
                 applicationName = project.applicationName
                 addFile project.distTar.outputs.files.singleFile
 
@@ -67,34 +62,16 @@ class DockerPlugin implements Plugin<Project> {
         logger.info("Adding docker task 'distDocker'");
     }
 
-    private String determineJavaBaseImage(def projectVersion) {
-        switch (projectVersion) {
-            case JavaVersion.VERSION_1_6:
-                return extension.baseImageJava16
-            case JavaVersion.VERSION_1_7:
-                return extension.baseImageJava17
-            case JavaVersion.VERSION_1_8:
-                return extension.baseImageJava18
-            default:
-                return extension.baseImageJava
-        }
-    }
-
     private void addDockerTaskType(Project project) {
         project.ext.Docker = DockerTask.class
         logger.info("Adding docker task type");
     }
 
     private DockerPluginExtension createExtension(Project project) {
-        def extension = project.extensions.create("docker", DockerPluginExtension)
+        def extension = project.extensions.create(EXTENSION_NAME, DockerPluginExtension)
         extension.with {
-            maintainer = "unknown"
+            maintainer = MAINTAINER_UNDEFINED
             dockerBinary = DOCKER_BINARY
-            baseImage = BASE_IMAGE
-            baseImageJava = BASE_IMAGE_JAVA
-            baseImageJava16 = BASE_IMAGE_JAVA6
-            baseImageJava17 = BASE_IMAGE_JAVA7
-            baseImageJava18 = BASE_IMAGE_JAVA8
             registry = ""
         }
         logger.info("Adding docker extension");
@@ -110,10 +87,8 @@ class DockerPlugin implements Plugin<Project> {
 
     private void applyTaskDefaults(task) {
         task.conventionMapping.with {
-            maintainer = { extension.maintainer }
             dockerBinary = { extension.dockerBinary }
             maintainer = { extension.maintainer }
-            baseImage = { extension.baseImage }
             registry = { extension.registry }
         }
     }

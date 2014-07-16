@@ -14,36 +14,64 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
-import org.gradle.api.Task
-import org.junit.Test
-import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import static org.junit.Assert.*
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
+
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.nullValue
+import static org.junit.Assert.assertThat
+import static org.junit.Assert.assertTrue
 
 class DockerTaskTest {
 
     private Project createProject() {
-        return ProjectBuilder.builder().build()
-    }
-
-    private Task createDockerTask() {
-        return createProject().task('docker', type: DockerTask)
+        Project project = ProjectBuilder.builder().build()
+        // apply java plugin
+        project.apply plugin: 'java'
+        // add docker extension
+        project.extensions.create(DockerPlugin.EXTENSION_NAME, DockerPluginExtension)
+        // add docker task
+        project.task('dockerTask', type: DockerTask)
+        return project
     }
 
     @Test
     public void addTaskToProject() {
-        def task = createDockerTask()
+        def task = ProjectBuilder.builder().build().task('dockerTask', type: DockerTask)
         assertTrue(task instanceof DockerTask)
     }
 
     @Test
     public void defineExposePort() {
-        def task = createDockerTask()
-        def port = 99
-        task.exposePort(port)
-        def dockerFile = task.buildDockerFile()
-        assertTrue("EXPOSE ${port}" in dockerFile)
+        def project = createProject()
+        project.dockerTask.exposePort(99)
+        assertTrue("EXPOSE ${99}" in project.dockerTask.buildDockerFile())
+    }
+
+    @Test
+    public void overrideBaseImageInExtension() {
+        def project = createProject()
+        project[DockerPlugin.EXTENSION_NAME].baseImage = "extensionBase"
+        assertThat(project.dockerTask.baseImage, equalTo("extensionBase"))
+    }
+
+    @Test
+    public void overrideBaseImageInTask() {
+        def project = createProject()
+        project.dockerTask.baseImage = "taskBase"
+        assertThat(project.dockerTask.baseImage, equalTo("taskBase"))
+    }
+
+    @Test
+    public void determineBaseImageFromTargetCompatibilityIfNotOverriden() {
+        def project = createProject()
+        def testVersion = JavaVersion.VERSION_1_6
+        project.targetCompatibility = testVersion
+        assertThat(project[DockerPlugin.EXTENSION_NAME].baseImage, nullValue())
+        assertThat(project.dockerTask.baseImage,
+                equalTo(JavaBaseImage.imageFor(testVersion).imageName))
     }
 
 

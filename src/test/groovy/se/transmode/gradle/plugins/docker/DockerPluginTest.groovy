@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
 import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
 import static org.junit.Assert.assertThat
 import static org.junit.Assert.assertTrue
 
@@ -54,7 +52,7 @@ class DockerPluginTest {
 
         def task = project.task('docker', type: DockerTask)
 
-        assertThat task.maintainer, is(equalTo(testMaintainer))
+        assertThat task.maintainer, equalTo(testMaintainer)
     }
 }
 
