@@ -51,6 +51,14 @@ class DockerTaskTest {
     }
 
     @Test
+    public void nonJavaDefaultBaseImage() {
+        def project = ProjectBuilder.builder().build()
+        project.extensions.create(DockerPlugin.EXTENSION_NAME, DockerPluginExtension)
+        def task = project.task('dockerTask', type: DockerTask)
+        assertThat(task.baseImage, equalTo(DockerTask.DEFAULT_IMAGE))
+    }
+
+    @Test
     public void overrideBaseImageInExtension() {
         def project = createProject()
         project[DockerPlugin.EXTENSION_NAME].baseImage = "extensionBase"

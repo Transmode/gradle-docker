@@ -24,6 +24,7 @@ import org.gradle.api.tasks.TaskAction
 class DockerTask extends DefaultTask {
 
     private static Logger logger = Logging.getLogger(DockerTask)
+    public static final String DEFAULT_IMAGE = 'ubuntu'
 
     // full path to the docker executable
     String dockerBinary
@@ -60,7 +61,8 @@ class DockerTask extends DefaultTask {
      * @return Name of base docker image
      */
     private String determineBaseImage() {
-        return baseImage ?: (project[DockerPlugin.EXTENSION_NAME].baseImage ?: JavaBaseImage.imageFor(project.targetCompatibility).imageName)
+        def defaultImage = project.hasProperty('targetCompatibility') ? JavaBaseImage.imageFor(project.targetCompatibility).imageName : DEFAULT_IMAGE
+        return baseImage ?: (project[DockerPlugin.EXTENSION_NAME].baseImage ?: defaultImage)
     }
 
     // Executable to run when image is instantiated
