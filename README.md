@@ -98,6 +98,34 @@ task fooDocker(type: Docker) {
 ### A note about base images ###
 If no base image is configured through the extension or task property a suitable image is chosen based on the project's `targetCompatibility`. A project targeting Java 7 will for instance get a default base image with a Java 7 runtime.
 
+## Docker API vs. Command Line
+
+By default the plug-in will use the `docker` command line tool to exectue any docker commands (such as `build` and `push`).  However, it can be configured to use the Docker REST API instead via the `useApi` extension property:
+
+    apply plugin: 'docker'
+
+    docker {
+        useApi true
+    }
+
+Use of the REST API requires that the Docker server be configured to listen over HTTP (use of Unix Domain sockets is not supported yet).  The following confiugration options are available:
+
+* serverUrl -- set the URL used to contact the Docker server.  Defaults to `http://localhost:2375`
+* username -- set the username used to authenticate the user with the Docker server.  Defaults to `nil` which means no authentication is performed.
+* password -- set the password used to authenticate the user with the Docker server.
+* email -- set the user's email used to authenticate the user with the Docker server.
+
+For example:
+
+    docker {
+        useApi true
+        serverUrl 'http://myserver:4243`
+        username 'user'
+        password 'password'
+        email 'me@mycompany.com'
+    }
+    
+    
 ## Requirements
 * Gradle 1.10
 * Docker 0.6+
