@@ -276,7 +276,7 @@ class DockerTask extends DefaultTask {
         
         // Do we have authentication info?
         def user = "${-> username}"
-        if (!StringUtils.isEmpty(user)) {
+        if (StringUtils.isNotEmpty(user)) {
             apiClient.setCredentials(user, "${-> password}", "${-> email}")
         }
         return apiClient
