@@ -15,11 +15,17 @@
  */
 package se.transmode.gradle.plugins.docker
 
+import org.apache.commons.lang.StringUtils;
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
+
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.command.AbstrDockerCmd;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 class DockerTask extends DefaultTask {
 
@@ -72,13 +78,24 @@ class DockerTask extends DefaultTask {
     // Dockerfile instructions (ADD, RUN, etc.)
     def instructions
     // Dockerfile staging area i.e. context dir
-    final File stageDir
-
-
+    File stageDir
+    
+    // Should we use the docker-java API or the docker executable
+    Boolean useApi
+    // URL for the server (if none if provided we assume the default)
+    String serverUrl
+    // Docker registry user name
+    String username
+    // Docker registry password
+    String password
+    // Docker registry email
+    String email
+    
     DockerTask() {
         entryPoint = []
         defaultCommand = []
         instructions = []
+        applicationName = project.name
         stageDir = new File(project.buildDir, "docker")
     }
 
@@ -128,7 +145,11 @@ class DockerTask extends DefaultTask {
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
-
+    
+    void contextDir(String contextDir) {
+        stageDir = new File(stageDir, contextDir)
+    }
+    
     List getPreamble() {
         def preamble = []
         preamble.add("FROM ${determineBaseImage()}")
@@ -184,17 +205,36 @@ class DockerTask extends DefaultTask {
         }
 
         if (!dryRun) {
-            println buildDockerImage(tag)
+            
+            DockerClient apiClient = null;
+            if (Boolean.valueOf("${-> useApi}")) {
+                apiClient = getAPIClient();
+            }
+            
+            println buildDockerImage(tag, apiClient)
 
             if (push) {
-                println pushDockerImage(tag)
+                println pushDockerImage(tag, apiClient)
             }
         }
 
     }
 
-    private String executeAndWait(GString cmdLine) {
-        logger.info("Executing command '" + cmdLine + "'.")
+    private String executeAndWait(AbstrDockerCmd cmd) {
+        logger.info("Executing command '${cmd}' via API.")
+        
+        ClientResponse response = cmd.exec()
+        def msg = response.getEntity(String.class)
+        if (response.statusType != Status.OK) {
+            throw new GradleException(
+                "docker execution failed\nCommand line [${cmd}] returned:\n${msg}")
+        }
+        return msg
+    }
+
+    private String executeAndWait(String cmdLine) {
+        logger.info("Executing command '${cmdLine}'.")
+        
         def process = cmdLine.execute()
         process.waitFor()
         if (process.exitValue()) {
@@ -203,13 +243,42 @@ class DockerTask extends DefaultTask {
         return process.in.text
     }
 
-    private String pushDockerImage(String tag) {
-        def cmdLine = "${-> dockerBinary} push ${tag}"
-        return executeAndWait(cmdLine)
+    private String pushDockerImage(String tag, DockerClient apiClient) {
+        if (apiClient != null) {
+            def cmd = apiClient.pushImageCmd(tag)
+            return executeAndWait(cmd)
+        } else {
+            def cmdLine = "${-> dockerBinary} push ${tag}"
+            return executeAndWait(cmdLine)
+        }
     }
 
-    private String buildDockerImage(String tag) {
-        def cmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
-        return executeAndWait(cmdLine)
+    private String buildDockerImage(String tag, DockerClient apiClient) {
+        if (apiClient != null) {
+            def cmd = apiClient.buildImageCmd(stageDir).withTag(tag)
+            return executeAndWait(cmd)
+        } else {
+            def cmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
+            return executeAndWait(cmdLine)
+        }
+    }
+    
+    private DockerClient getAPIClient() {
+        DockerClient apiClient
+        
+        // Either create default client or one for configured URL
+        def urlStr = "${-> serverUrl}"
+        if (StringUtils.isEmpty(urlStr)) {
+            apiClient = new DockerClient()
+        } else {
+            apiClient = new DockerClient(urlStr)
+        }
+        
+        // Do we have authentication info?
+        def user = "${-> username}"
+        if (!StringUtils.isEmpty(user)) {
+            apiClient.setCredentials(user, "${-> password}", "${-> email}")
+        }
+        return apiClient
     }
 }

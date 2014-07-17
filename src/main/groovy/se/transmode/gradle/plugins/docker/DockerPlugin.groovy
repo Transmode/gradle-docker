@@ -73,6 +73,9 @@ class DockerPlugin implements Plugin<Project> {
             maintainer = MAINTAINER_UNDEFINED
             dockerBinary = DOCKER_BINARY
             registry = ""
+            useApi = Boolean.FALSE
+            serverUrl = ''
+            username = ''
         }
         logger.info("Adding docker extension");
         return extension
@@ -90,6 +93,11 @@ class DockerPlugin implements Plugin<Project> {
             dockerBinary = { extension.dockerBinary }
             maintainer = { extension.maintainer }
             registry = { extension.registry }
+            useApi = { extension.useApi }
+            serverUrl = { extension.serverUrl }
+            username = { extension.username }
+            password = { extension.password }
+            email = { extension.email }
         }
     }
 }
