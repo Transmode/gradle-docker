@@ -1,7 +1,7 @@
 apply plugin: 'docker'
 
 buildscript {
-    repositories { jCentral() }
+    repositories { mavenLocal(); jcenter() }
     dependencies {
         classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
