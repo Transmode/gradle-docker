@@ -75,16 +75,14 @@ class DockerTask extends DefaultTask {
     // Dockerfile staging area i.e. context dir
     File stageDir
     
-    // Should we use the docker-java API or the docker executable
+    // Should we use Docker's remote API instead of the docker executable
     Boolean useApi
-    // URL for the server (if none if provided we assume the default)
-    String serverUrl
-    // Docker registry user name
-    String username
-    // Docker registry password
-    String password
-    // Docker registry email
-    String email
+    // URL of the remote Docker host (default: localhost)
+    String hostUrl
+    // Docker remote API credentials
+    String apiUsername
+    String apiPassword
+    String apiEmail
 
     DockerTask() {
         entryPoint = []
@@ -212,12 +210,12 @@ class DockerTask extends DefaultTask {
     private DockerClient getClient() {
         DockerClient client
         if(getUseApi()) {
-            log.info("Using the Docker Java API.")
+            log.info("Using the Docker remote API.")
             client = JavaDockerClient.create(
-                    getServerUrl(),
-                    getUsername(),
-                    getPassword(),
-                    getEmail())
+                    getHostUrl(),
+                    getApiUsername(),
+                    getApiPassword(),
+                    getApiEmail())
         } else {
             log.info("Using the native docker binary.")
             client = new NativeDockerClient(getDockerBinary())
