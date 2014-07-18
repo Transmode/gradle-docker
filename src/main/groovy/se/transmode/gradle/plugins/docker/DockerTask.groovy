@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
-import org.apache.commons.lang.StringUtils;
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
-
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.command.AbstrDockerCmd;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.ClientResponse.Status;
+import se.transmode.gradle.plugins.docker.client.DockerClient
+import se.transmode.gradle.plugins.docker.client.JavaDockerClient
+import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 
 class DockerTask extends DefaultTask {
 
@@ -90,7 +85,7 @@ class DockerTask extends DefaultTask {
     String password
     // Docker registry email
     String email
-    
+
     DockerTask() {
         entryPoint = []
         defaultCommand = []
@@ -205,80 +200,22 @@ class DockerTask extends DefaultTask {
         }
 
         if (!dryRun) {
-            
-            DockerClient apiClient = null;
-            if (Boolean.valueOf("${-> useApi}")) {
-                apiClient = getAPIClient();
-            }
-            
-            println buildDockerImage(tag, apiClient)
-
+            DockerClient client = getClient()
+            println client.buildImage(stageDir, tag)
             if (push) {
-                println pushDockerImage(tag, apiClient)
+                println client.pushImage(tag)
             }
         }
 
     }
 
-    private String executeAndWait(AbstrDockerCmd cmd) {
-        logger.info("Executing command '${cmd}' via API.")
-        
-        ClientResponse response = cmd.exec()
-        def msg = response.getEntity(String.class)
-        if (response.statusType != Status.OK) {
-            throw new GradleException(
-                "docker execution failed\nCommand line [${cmd}] returned:\n${msg}")
-        }
-        return msg
-    }
-
-    private String executeAndWait(String cmdLine) {
-        logger.info("Executing command '${cmdLine}'.")
-        
-        def process = cmdLine.execute()
-        process.waitFor()
-        if (process.exitValue()) {
-           throw new GradleException("docker execution failed\nCommand line [${cmdLine}] returned:\n${process.err.text}")
-        }
-        return process.in.text
-    }
-
-    private String pushDockerImage(String tag, DockerClient apiClient) {
-        if (apiClient != null) {
-            def cmd = apiClient.pushImageCmd(tag)
-            return executeAndWait(cmd)
+    private DockerClient getClient() {
+        DockerClient client
+        if (useApi) {
+            client = JavaDockerClient.create(serverUrl, username, password, email)
         } else {
-            def cmdLine = "${-> dockerBinary} push ${tag}"
-            return executeAndWait(cmdLine)
+            client = new NativeDockerClient(dockerBinary)
         }
-    }
-
-    private String buildDockerImage(String tag, DockerClient apiClient) {
-        if (apiClient != null) {
-            def cmd = apiClient.buildImageCmd(stageDir).withTag(tag)
-            return executeAndWait(cmd)
-        } else {
-            def cmdLine = "${-> dockerBinary} build -t ${-> tag} ${-> stageDir}"
-            return executeAndWait(cmdLine)
-        }
-    }
-    
-    private DockerClient getAPIClient() {
-        DockerClient apiClient
-        
-        // Either create default client or one for configured URL
-        def urlStr = "${-> serverUrl}"
-        if (StringUtils.isEmpty(urlStr)) {
-            apiClient = new DockerClient()
-        } else {
-            apiClient = new DockerClient(urlStr)
-        }
-        
-        // Do we have authentication info?
-        def user = "${-> username}"
-        if (StringUtils.isNotEmpty(user)) {
-            apiClient.setCredentials(user, "${-> password}", "${-> email}")
-        }
-        return apiClient
+        return client
     }
 }
