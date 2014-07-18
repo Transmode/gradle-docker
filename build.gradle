@@ -7,11 +7,6 @@ buildscript {
 
 repositories {
     jcenter()
-
-    // Needed to get SNAPSHOT version of java-docker API
-    maven {
-        url 'https://oss.sonatype.org/content/groups/public/'
-    }
 }
 
 apply from: file('gradle/license.gradle')
@@ -44,9 +39,6 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     
-    // We need the 0.9.1 version which hasn't been released yet
-    compile 'com.github.docker-java:docker-java:0.9.1-SNAPSHOT'
-
     compile 'com.google.guava:guava:17.0'
     compile 'com.github.docker-java:docker-java:0.9.0'
 

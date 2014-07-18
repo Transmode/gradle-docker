@@ -100,7 +100,7 @@ If no base image is configured through the extension or task property a suitable
 
 ## Docker API vs. Command Line
 
-By default the plug-in will use the `docker` command line tool to exectue any docker commands (such as `build` and `push`).  However, it can be configured to use the Docker REST API instead via the `useApi` extension property:
+By default the plug-in will use the `docker` command line tool to execute any docker commands (such as `build` and `push`).  However, it can be configured to use the Docker REST API instead via the `useApi` extension property:
 
     apply plugin: 'docker'
 
@@ -108,7 +108,7 @@ By default the plug-in will use the `docker` command line tool to exectue any do
         useApi true
     }
 
-Use of the REST API requires that the Docker server be configured to listen over HTTP (use of Unix Domain sockets is not supported yet).  The following confiugration options are available:
+Use of the REST API requires that the Docker server be configured to listen over HTTP and that it have support for version 1.11 of the API (connecting over Unix Domain sockets is not supported yet).  The following configuration options are available:
 
 * serverUrl -- set the URL used to contact the Docker server.  Defaults to `http://localhost:2375`
 * username -- set the username used to authenticate the user with the Docker server.  Defaults to `nil` which means no authentication is performed.
@@ -128,6 +128,6 @@ For example:
     
 ## Requirements
 * Gradle 1.10
-* Docker 0.6+
+* Docker 0.11+
 
 You need to have docker installed in order to build docker images. However if the `dryRun` task property is set to `true`  all calls to docker are disabled. In that case only the Dockerfile and its context directory will be created.

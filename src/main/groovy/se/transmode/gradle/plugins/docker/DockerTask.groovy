@@ -22,11 +22,6 @@ import se.transmode.gradle.plugins.docker.client.DockerClient
 import se.transmode.gradle.plugins.docker.client.JavaDockerClient
 import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.command.AbstrDockerCmd;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.ClientResponse.Status;
-
 class DockerTask extends DefaultTask {
 
     private static Logger log = Logging.getLogger(DockerTask)
@@ -90,7 +85,7 @@ class DockerTask extends DefaultTask {
     String password
     // Docker registry email
     String email
-    
+
     DockerTask() {
         entryPoint = []
         defaultCommand = []

@@ -65,7 +65,8 @@ public class JavaDockerClient extends com.github.dockerjava.client.DockerClient 
         JavaDockerClient client;
         if (StringUtils.isEmpty(url)) {
             log.info("Connecting to localhost");
-            client = new JavaDockerClient();
+            // TODO -- use no-arg constructor once we switch to java-docker 0.9.1
+            client = new JavaDockerClient("http://localhost:2375");
         } else {
             log.info("Connecting to {}", url);
             client = new JavaDockerClient(url);
