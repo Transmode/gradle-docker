@@ -7,11 +7,6 @@ buildscript {
 
 repositories {
     jcenter()
-
-    // @fixme: Remove snapshot repo when java-docker 0.9.1 is released.
-    maven {
-        url 'https://oss.sonatype.org/content/groups/public/'
-    }
 }
 
 apply from: file('gradle/license.gradle')
@@ -44,8 +39,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    // @fixme: Switch to 0.9.1 release once it is release, for now we use SNAPSHOT
-    compile 'com.github.docker-java:docker-java:0.9.1-SNAPSHOT'
+    compile 'com.github.docker-java:docker-java:0.9.0'
 
     testCompile 'junit:junit-dep:4.11'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
