@@ -15,6 +15,7 @@
  */
 package se.transmode.gradle.plugins.docker.client;
 
+import com.google.common.base.Preconditions;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.commons.lang.StringUtils;
 import org.gradle.api.GradleException;
@@ -37,12 +38,16 @@ public class JavaDockerClient extends com.github.dockerjava.client.DockerClient 
 
     @Override
     public String buildImage(File buildDir, String tag) {
+        Preconditions.checkNotNull(tag, "Image tag can not be null.");
+        Preconditions.checkArgument(!tag.isEmpty(),  "Image tag can not be empty.");
         ClientResponse response = buildImageCmd(buildDir).withTag(tag).exec();
         return checkResponse(response);
     }
 
     @Override
     public String pushImage(String tag) {
+        Preconditions.checkNotNull(tag, "Image tag can not be null.");
+        Preconditions.checkArgument(!tag.isEmpty(),  "Image tag can not be empty.");
         ClientResponse response = pushImageCmd(tag).exec();
         return checkResponse(response);
     }
