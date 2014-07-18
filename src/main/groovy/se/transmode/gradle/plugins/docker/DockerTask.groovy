@@ -24,7 +24,7 @@ import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 
 class DockerTask extends DefaultTask {
 
-    private static Logger logger = Logging.getLogger(DockerTask)
+    private static Logger log = Logging.getLogger(DockerTask)
     public static final String DEFAULT_IMAGE = 'ubuntu'
 
     // full path to the docker executable
@@ -212,12 +212,14 @@ class DockerTask extends DefaultTask {
     private DockerClient getClient() {
         DockerClient client
         if(getUseApi()) {
+            log.info("Using the Docker Java API.")
             client = JavaDockerClient.create(
                     getServerUrl(),
                     getUsername(),
                     getPassword(),
                     getEmail())
         } else {
+            log.info("Using the native docker binary.")
             client = new NativeDockerClient(getDockerBinary())
         }
         return client

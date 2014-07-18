@@ -18,10 +18,14 @@ package se.transmode.gradle.plugins.docker.client;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.commons.lang.StringUtils;
 import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import java.io.File;
 
 public class JavaDockerClient extends com.github.dockerjava.client.DockerClient implements DockerClient {
+
+    private static Logger log = Logging.getLogger(JavaDockerClient.class);
 
     JavaDockerClient() {
         super();
@@ -55,8 +59,10 @@ public class JavaDockerClient extends com.github.dockerjava.client.DockerClient 
     public static JavaDockerClient create(String url, String user, String password, String email) {
         JavaDockerClient client;
         if (StringUtils.isEmpty(url)) {
+            log.info("Connecting to localhost");
             client = new JavaDockerClient();
         } else {
+            log.info("Connecting to {}", url);
             client = new JavaDockerClient(url);
         }
 
