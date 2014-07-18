@@ -211,10 +211,14 @@ class DockerTask extends DefaultTask {
 
     private DockerClient getClient() {
         DockerClient client
-        if (useApi) {
-            client = JavaDockerClient.create(serverUrl, username, password, email)
+        if(getUseApi()) {
+            client = JavaDockerClient.create(
+                    getServerUrl(),
+                    getUsername(),
+                    getPassword(),
+                    getEmail())
         } else {
-            client = new NativeDockerClient(dockerBinary)
+            client = new NativeDockerClient(getDockerBinary())
         }
         return client
     }
