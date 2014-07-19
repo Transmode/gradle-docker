@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+
 import com.google.common.io.Files
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
@@ -93,13 +94,13 @@ class DockerTask extends DefaultTask {
         stageDir = new File(project.buildDir, "docker")
     }
 
-    void addFile(File file) {
+    void addFile(File file, String destination='/') {
         stageDir.mkdir()
         project.copy {
             from file
             into stageDir
         }
-        addFileFromStageDir(file)
+        addFileFromStageDir(file, destination)
     }
 
     void addFile(Closure copySpec) {
@@ -136,9 +137,9 @@ class DockerTask extends DefaultTask {
         return createTarArchive(tarPath, tmpDir)
     }
 
-    private void addFileFromStageDir(File file) {
-        logger.info("ADD ${file} /")
-        instructions.add("ADD ${file.name} /")
+    private void addFileFromStageDir(File file, String destination) {
+        logger.info("ADD ${file} ${destination}")
+        instructions.add("ADD ${file.name} ${destination}")
     }
 
     private void addArchive(File archive) {
