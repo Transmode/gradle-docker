@@ -17,14 +17,18 @@ package se.transmode.gradle.plugins.docker
 
 class DockerPluginExtension {
     String maintainer
-    String dockerBinary
     String baseImage
     String registry
-    
-    // Configuration of docker-java API
+
+    // path to the docker binary
+    String dockerBinary
+
+    // use docker REST api (with docker-java)
     Boolean useApi
-    String serverUrl
-    String username
-    String password
-    String email
+
+    // docker host url & credentials
+    String hostUrl
+    String apiUsername
+    String apiEmail
+    String apiPassword
 }

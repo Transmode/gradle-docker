@@ -74,8 +74,10 @@ class DockerPlugin implements Plugin<Project> {
             dockerBinary = DOCKER_BINARY
             registry = ""
             useApi = Boolean.FALSE
-            serverUrl = ''
-            username = ''
+            hostUrl = ''
+            apiUsername = ''
+            apiEmail = ''
+            apiPassword = ''
         }
         logger.info("Adding docker extension");
         return extension
@@ -89,15 +91,17 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     private void applyTaskDefaults(task) {
+        // @todo: don't use conventionMapping as it is an internal mechanism
+        //        see http://forums.gradle.org/gradle/topics/how_do_you_use_a_conventionmapping_to_do_the_following
         task.conventionMapping.with {
             dockerBinary = { extension.dockerBinary }
             maintainer = { extension.maintainer }
             registry = { extension.registry }
             useApi = { extension.useApi }
-            serverUrl = { extension.serverUrl }
-            username = { extension.username }
-            password = { extension.password }
-            email = { extension.email }
+            hostUrl = { extension.hostUrl }
+            apiUsername = { extension.apiUsername }
+            apiPassword = { extension.apiPassword }
+            apiEmail = { extension.apiEmail }
         }
     }
 }

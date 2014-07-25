@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+import com.google.common.io.Files
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -24,7 +25,7 @@ import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 
 class DockerTask extends DefaultTask {
 
-    private static Logger log = Logging.getLogger(DockerTask)
+    private static Logger logger = Logging.getLogger(DockerTask)
     public static final String DEFAULT_IMAGE = 'ubuntu'
 
     // full path to the docker executable
@@ -74,39 +75,66 @@ class DockerTask extends DefaultTask {
     def instructions
     // Dockerfile staging area i.e. context dir
     File stageDir
+    // Tasks necessary to setup the stage before building an image
+    def stageBacklog
     
-    // Should we use the docker-java API or the docker executable
+    // Should we use Docker's remote API instead of the docker executable
     Boolean useApi
-    // URL for the server (if none if provided we assume the default)
-    String serverUrl
-    // Docker registry user name
-    String username
-    // Docker registry password
-    String password
-    // Docker registry email
-    String email
+    // URL of the remote Docker host (default: localhost)
+    String hostUrl
+    // Docker remote API credentials
+    String apiUsername
+    String apiPassword
+    String apiEmail
 
     DockerTask() {
         entryPoint = []
         defaultCommand = []
         instructions = []
+        stageBacklog = []
         applicationName = project.name
         stageDir = new File(project.buildDir, "docker")
     }
 
-    void addFile(File file) {
-        stageDir.mkdir()
-        project.copy {
-            from file
-            into stageDir
+    void addFile(String source, String destination='/') {
+        addFile(project.file(source), destination)
+    }
+
+    void addFile(File source, String destination='/') {
+        stageBacklog.add { ->
+            project.copy {
+                from source
+                into stageDir
+            }
         }
-        instructions.add("ADD ${file.name} /")
+        instructions.add("ADD ${source.name} ${destination}")
     }
 
     void addFile(Closure copySpec) {
-        stageDir.mkdir()
-        project.copy(copySpec)
-        instructions.add("ADD ${copySpec} ${destPath}")
+        final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
+        stageBacklog.add { ->
+            createTarArchive(tarFile, copySpec)
+        }
+        instructions.add("ADD ${tarFile.name} ${'/'}")
+    }
+
+    void createTarArchive(File tarFile, Closure copySpec) {
+        final tmpDir = Files.createTempDir()
+        logger.info("Creating tar archive {} from {}", tarFile, tmpDir)
+        /* copy all files to temporary directory */
+        project.copy {
+            with {
+                into('/') {
+                    with copySpec
+                }
+            }
+            into tmpDir
+        }
+        /* create tar archive */
+        new AntBuilder().tar(
+                destfile: tarFile,
+                basedir: tmpDir
+        )
     }
 
     void workingDir(String wd) {
@@ -177,27 +205,19 @@ class DockerTask extends DefaultTask {
     @TaskAction
     void build() {
 
+        logger.info('Setting up staging directory.')
         createDirIfNotExists(stageDir)
+        stageBacklog.each() { it() }
 
+        logger.info('Creating Dockerfile.')
         new File(stageDir, "Dockerfile").withWriter { out ->
             buildDockerFile().each() { line ->
                 out.writeLine(line)
             }
         }
 
-        if (registry) {
-            tag = "${-> registry}/${-> applicationName}"
-        }
-        else if (project.group) {
-            tag = "${-> project.group}/${-> applicationName}"
-        }
-        else {
-            tag = "${-> applicationName}"
-        }
-
-        if (tagVersion) {
-            tag += ":${-> tagVersion}"
-        }
+        tag = getImageTag()
+        logger.info('Determining image tag: {}', tag)
 
         if (!dryRun) {
             DockerClient client = getClient()
@@ -209,17 +229,44 @@ class DockerTask extends DefaultTask {
 
     }
 
+    private String getImageTag() {
+        String tag
+        tag = this.tag ?: getDefaultImageTag()
+        return appendImageTagVersion(tag)
+    }
+
+    private String getDefaultImageTag() {
+        String tag
+        if (registry) {
+            tag = "${-> registry}/${-> applicationName}"
+        } else if (project.group) {
+            tag = "${-> project.group}/${-> applicationName}"
+        } else {
+            tag = "${-> applicationName}"
+        }
+        return tag
+    }
+
+    private String appendImageTagVersion(String tag) {
+        def version = tagVersion ?: project.version
+        if(version == 'unspecified') {
+            version = 'latest'
+        }
+        return "${tag}:${version}"
+
+    }
+
     private DockerClient getClient() {
         DockerClient client
         if(getUseApi()) {
-            log.info("Using the Docker Java API.")
+            logger.info("Using the Docker remote API.")
             client = JavaDockerClient.create(
-                    getServerUrl(),
-                    getUsername(),
-                    getPassword(),
-                    getEmail())
+                    getHostUrl(),
+                    getApiUsername(),
+                    getApiPassword(),
+                    getApiEmail())
         } else {
-            log.info("Using the native docker binary.")
+            logger.info("Using the native docker binary.")
             client = new NativeDockerClient(getDockerBinary())
         }
         return client
