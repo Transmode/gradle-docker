@@ -5,7 +5,7 @@ apply plugin: 'docker'
 buildscript {
     repositories { mavenLocal(); jcenter() }
     dependencies {
-        classpath 'se.transmode.gradle:gradle-docker:1.2'
+        classpath 'se.transmode.gradle:gradle-docker:1.2-SNAPSHOT'
     }
 }
 
@@ -14,7 +14,7 @@ group = 'example'
 version = '1.0'
 mainClassName = 'se.transmode.example.docker.JettyMain'
 
-repositories { mavenCentral() }
+repositories { jcenter() }
 dependencies {
     compile 'org.eclipse.jetty.aggregate:jetty-all:9.0.6.v20130930'
 }
