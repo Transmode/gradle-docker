@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
 import com.google.common.io.Files
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
@@ -76,6 +75,8 @@ class DockerTask extends DefaultTask {
     def instructions
     // Dockerfile staging area i.e. context dir
     File stageDir
+    // Tasks necessary to setup the stage before building an image
+    def stageBacklog
     
     // Should we use Docker's remote API instead of the docker executable
     Boolean useApi
@@ -90,60 +91,50 @@ class DockerTask extends DefaultTask {
         entryPoint = []
         defaultCommand = []
         instructions = []
+        stageBacklog = []
         applicationName = project.name
         stageDir = new File(project.buildDir, "docker")
     }
 
-    void addFile(File file, String destination='/') {
-        stageDir.mkdir()
-        project.copy {
-            from file
-            into stageDir
+    void addFile(String source, String destination='/') {
+        addFile(project.file(source), destination)
+    }
+
+    void addFile(File source, String destination='/') {
+        stageBacklog.add { ->
+            project.copy {
+                from source
+                into stageDir
+            }
         }
-        addFileFromStageDir(file, destination)
+        instructions.add("ADD ${source.name} ${destination}")
     }
 
     void addFile(Closure copySpec) {
-
-        //@fixme: don't actually do the work here. add it to backlog and execute in @TaskAction method
-        stageDir.mkdir()
-
-        log.warn("Stage dir: {}", stageDir.toString())
-        final File tarPath = File.createTempFile('add_', '.tar', stageDir)
-        tarPath.delete()
-        File tarFile = createTarArchive(tarPath) {
-            into('/') {
-                with copySpec
-            }
+        final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
+        stageBacklog.add { ->
+            createTarArchive(tarFile, copySpec)
         }
-        addFileFromStageDir(tarFile)
+        instructions.add("ADD ${tarFile.name} ${'/'}")
     }
 
-    private static File createTarArchive(File tarPath, File dir) {
-        log.warn("Creating tar archive {} from {}", tarPath, dir)
-        new AntBuilder().tar(
-                destfile: tarPath,
-                basedir: dir
-        )
-        return tarPath
-    }
-
-    private File createTarArchive(File tarPath, Closure copySpec) {
-        final File tmpDir = Files.createTempDir()
+    void createTarArchive(File tarFile, Closure copySpec) {
+        final tmpDir = Files.createTempDir()
+        logger.info("Creating tar archive {} from {}", tarFile, tmpDir)
+        /* copy all files to temporary directory */
         project.copy {
-            with copySpec
+            with {
+                into('/') {
+                    with copySpec
+                }
+            }
             into tmpDir
         }
-        return createTarArchive(tarPath, tmpDir)
-    }
-
-    private void addFileFromStageDir(File file, String destination) {
-        logger.info("ADD ${file} ${destination}")
-        instructions.add("ADD ${file.name} ${destination}")
-    }
-
-    private void addArchive(File archive) {
-        addFile(archive)
+        /* create tar archive */
+        new AntBuilder().tar(
+                destfile: tarFile,
+                basedir: tmpDir
+        )
     }
 
     void workingDir(String wd) {
@@ -214,8 +205,11 @@ class DockerTask extends DefaultTask {
     @TaskAction
     void build() {
 
+        logger.info('Setting up staging directory.')
         createDirIfNotExists(stageDir)
+        stageBacklog.each() { it() }
 
+        logger.info('Creating Dockerfile.')
         new File(stageDir, "Dockerfile").withWriter { out ->
             buildDockerFile().each() { line ->
                 out.writeLine(line)
