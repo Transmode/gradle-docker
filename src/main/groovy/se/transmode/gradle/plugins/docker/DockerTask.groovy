@@ -183,19 +183,8 @@ class DockerTask extends DefaultTask {
             }
         }
 
-        if (registry) {
-            tag = "${-> registry}/${-> applicationName}"
-        }
-        else if (project.group) {
-            tag = "${-> project.group}/${-> applicationName}"
-        }
-        else {
-            tag = "${-> applicationName}"
-        }
-
-        if (tagVersion) {
-            tag += ":${-> tagVersion}"
-        }
+        tag = getImageTag()
+        logger.info('Determining image tag: {}', tag)
 
         if (!dryRun) {
             DockerClient client = getClient()
@@ -204,6 +193,33 @@ class DockerTask extends DefaultTask {
                 println client.pushImage(tag)
             }
         }
+
+    }
+
+    private String getImageTag() {
+        String tag
+        tag = this.tag ?: getDefaultImageTag()
+        return appendImageTagVersion(tag)
+    }
+
+    private String getDefaultImageTag() {
+        String tag
+        if (registry) {
+            tag = "${-> registry}/${-> applicationName}"
+        } else if (project.group) {
+            tag = "${-> project.group}/${-> applicationName}"
+        } else {
+            tag = "${-> applicationName}"
+        }
+        return tag
+    }
+
+    private String appendImageTagVersion(String tag) {
+        def version = tagVersion ?: project.version
+        if(version == 'unspecified') {
+            version = 'latest'
+        }
+        return "${tag}:${version}"
 
     }
 
