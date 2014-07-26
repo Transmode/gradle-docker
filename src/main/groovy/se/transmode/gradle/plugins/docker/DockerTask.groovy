@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Files
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
+
 import se.transmode.gradle.plugins.docker.client.DockerClient
 import se.transmode.gradle.plugins.docker.client.JavaDockerClient
 import se.transmode.gradle.plugins.docker.client.NativeDockerClient
@@ -101,10 +104,14 @@ class DockerTask extends DefaultTask {
     }
 
     void addFile(File source, String destination='/') {
+        def target = stageDir
+        if (source.isDirectory()) {
+            target = new File(stageDir, source.name)
+        }
         stageBacklog.add { ->
             project.copy {
                 from source
-                into stageDir
+                into target
             }
         }
         instructions.add("ADD ${source.name} ${destination}")
@@ -201,14 +208,18 @@ class DockerTask extends DefaultTask {
             dir.mkdirs()
         return dir
     }
-
-    @TaskAction
-    void build() {
-
+    
+    @VisibleForTesting
+    protected void setupStageDir() {
         logger.info('Setting up staging directory.')
         createDirIfNotExists(stageDir)
         stageBacklog.each() { it() }
+    }
 
+    @TaskAction
+    void build() {
+        setupStageDir();
+        
         logger.info('Creating Dockerfile.')
         new File(stageDir, "Dockerfile").withWriter { out ->
             buildDockerFile().each() { line ->
