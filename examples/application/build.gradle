@@ -9,6 +9,10 @@ buildscript {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
 sourceCompatibility = 1.7
 group = 'example'
 version = '1.0'
