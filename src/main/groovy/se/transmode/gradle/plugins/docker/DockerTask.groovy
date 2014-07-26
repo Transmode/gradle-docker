@@ -169,7 +169,7 @@ class DockerTask extends DefaultTask {
     }
 
     void setTagVersionToLatest() {
-        tagVersion = null;
+        tagVersion = 'latest';
     }
 
     void volume(String... paths) {
