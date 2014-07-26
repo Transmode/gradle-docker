@@ -19,6 +19,8 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import com.google.common.io.Resources;
+
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.nullValue
 import static org.junit.Assert.assertThat
@@ -82,5 +84,25 @@ class DockerTaskTest {
                 equalTo(JavaBaseImage.imageFor(testVersion).imageName))
     }
 
+    private static final String TEST_TARGET_DIR = 'testTargetDir'
 
+    @Test
+    public void testAddFileWithDir() {
+        def project = createProject()
+        
+        // Get directory to use
+        URL dir_url = ClassLoader.getSystemResource(TEST_TARGET_DIR)
+        File dir = new File(dir_url.toURI())
+        assertThat(dir.isDirectory(), equalTo(true))
+        
+        // Add the directory and do the work to move it to the staging directory
+        project.dockerTask.addFile(dir)
+        project.dockerTask.setupStageDir()
+        
+        // Confirm that the directory was copied under the staging dir
+        File targetDir = new File(project.dockerTask.stageDir, TEST_TARGET_DIR)
+        assertThat(targetDir.exists(), equalTo(true))
+        assertThat(targetDir.isDirectory(), equalTo(true))
+        assertThat(targetDir.list().length, equalTo(dir.list().length))
+    }
 }
