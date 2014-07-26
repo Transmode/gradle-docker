@@ -79,9 +79,9 @@ tag = "${project.group}/${applicationName}:${tagVersion}"
 
 Where:
 
- - `project.group` -- This is a standard Gradle project property. If not defined, the `{project.group}/` is omitted.
- - `applicationName` -- The name of the application being "dockerized".
- - `tagVersion` -- Optional version name added to the image tag name.
+ - `project.group` - This is a standard Gradle project property. If not defined, the `{project.group}/` is omitted.
+ - `applicationName` - The name of the application being "dockerized".
+ - `tagVersion` - Optional version name added to the image tag name. Defaults to `project.version` or "latest" if `project.version` is unspecified.
 
 The following example task will tag the docker image as `org.acme/bar:13.0`:
 
