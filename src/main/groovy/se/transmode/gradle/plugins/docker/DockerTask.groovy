@@ -25,6 +25,7 @@ import org.gradle.api.tasks.TaskAction
 import se.transmode.gradle.plugins.docker.client.DockerClient
 import se.transmode.gradle.plugins.docker.client.JavaDockerClient
 import se.transmode.gradle.plugins.docker.client.NativeDockerClient
+import se.transmode.gradle.plugins.docker.image.Dockerfile
 
 class DockerTask extends DefaultTask {
 
@@ -49,6 +50,17 @@ class DockerTask extends DefaultTask {
     String registry
 
     /**
+     * Path to external Dockerfile
+     */
+    File dockerfile
+    public void setDockerfile(String path) {
+        setDockerfile(project.file(path))
+    }
+    public void setDockerfile(File dockerfile) {
+        this.dockerfile = dockerfile
+    }
+
+    /**
      * Name of the base docker image
     */
     String baseImage
@@ -70,10 +82,6 @@ class DockerTask extends DefaultTask {
         return baseImage ?: (project[DockerPlugin.EXTENSION_NAME].baseImage ?: defaultImage)
     }
 
-    // Executable to run when image is instantiated
-    def entryPoint
-    // Executable to run when image is instantiated without a parameter or  executable
-    def defaultCommand
     // Dockerfile instructions (ADD, RUN, etc.)
     def instructions
     // Dockerfile staging area i.e. context dir
@@ -91,8 +99,6 @@ class DockerTask extends DefaultTask {
     String apiEmail
 
     DockerTask() {
-        entryPoint = []
-        defaultCommand = []
         instructions = []
         stageBacklog = []
         applicationName = project.name
@@ -175,33 +181,26 @@ class DockerTask extends DefaultTask {
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
-    
+
+    void setEntryPoint(List entryPoint) {
+        instructions.add('ENTRYPOINT ["' + entryPoint.join('", "') + '"]')
+    }
+
+    void entryPoint(List entryPoint) {
+        this.setEntryPoint(entryPoint)
+    }
+
+    void setDefaultCommand(List cmd) {
+        instructions.add('CMD ["' + cmd.join('", "') + '"]')
+    }
+
+    void defaultCommand(List cmd) {
+        this.setDefaultCommand(cmd)
+    }
+
     void contextDir(String contextDir) {
         stageDir = new File(stageDir, contextDir)
     }
-    
-    List getPreamble() {
-        def preamble = []
-        preamble.add("FROM ${determineBaseImage()}")
-        preamble.add("MAINTAINER ${-> maintainer}")
-        return preamble
-    }
-
-    List getEpilogue() {
-        def epilogue = []
-        if (entryPoint) {
-            epilogue.add('ENTRYPOINT ["' + entryPoint.join('", "') + '"]')
-        }
-        if (defaultCommand) {
-            epilogue.add('CMD ["' + defaultCommand.join('", "') + '"]')
-        }
-        return epilogue
-    }
-
-    public List buildDockerFile() {
-        return preamble + instructions + epilogue
-    }
-
 
     private File createDirIfNotExists(File dir) {
         if (!dir.exists())
@@ -216,17 +215,27 @@ class DockerTask extends DefaultTask {
         stageBacklog.each() { it() }
     }
 
+    @VisibleForTesting
+    protected Dockerfile buildDockerfile() {
+        def baseDockerfile
+        if (getDockerfile()) {
+            logger.info('Creating Dockerfile from file {}.', dockerfile)
+            baseDockerfile = Dockerfile.fromExternalFile(dockerfile)
+        } else {
+            def baseImage = determineBaseImage()
+            logger.info('Creating Dockerfile from base {}.', baseImage)
+            baseDockerfile = Dockerfile.fromBaseImage(baseImage)
+        }
+        if (getMaintainer()) {
+            baseDockerfile.append("MAINTAINER ${getMaintainer()}")
+        }
+        return baseDockerfile.appendAll(instructions)
+    }
+
     @TaskAction
     void build() {
-        setupStageDir();
-        
-        logger.info('Creating Dockerfile.')
-        new File(stageDir, "Dockerfile").withWriter { out ->
-            buildDockerFile().each() { line ->
-                out.writeLine(line)
-            }
-        }
-
+        setupStageDir()
+        buildDockerfile().writeToFile(new File(stageDir, 'Dockerfile'))
         tag = getImageTag()
         logger.info('Determining image tag: {}', tag)
 

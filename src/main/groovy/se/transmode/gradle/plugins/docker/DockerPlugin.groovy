@@ -56,7 +56,7 @@ class DockerPlugin implements Plugin<Project> {
                 addFile project.distTar.outputs.files.singleFile
 
                 def installDir = "/" + project.distTar.archiveName - ".${project.distTar.extension}"
-                entryPoint(["$installDir/bin/${project.applicationName}"])
+                entryPoint = ["$installDir/bin/${project.applicationName}"]
             }
         }
         logger.info("Adding docker task 'distDocker'");
@@ -70,9 +70,9 @@ class DockerPlugin implements Plugin<Project> {
     private DockerPluginExtension createExtension(Project project) {
         def extension = project.extensions.create(EXTENSION_NAME, DockerPluginExtension)
         extension.with {
-            maintainer = MAINTAINER_UNDEFINED
+            maintainer = ''
             dockerBinary = DOCKER_BINARY
-            registry = ""
+            registry = ''
             useApi = Boolean.FALSE
             hostUrl = ''
             apiUsername = ''
