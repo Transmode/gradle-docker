@@ -22,8 +22,14 @@ class Dockerfile {
         this.instructions = instructions
     }
 
-    void append(String instruction) {
+    Dockerfile append(String instruction) {
         this.instructions.add(instruction)
+        return this
+    }
+
+    Dockerfile appendAll(List instructions) {
+        this.instructions.addAll(instructions)
+        return this
     }
 
     void writeToFile(File destination) {
