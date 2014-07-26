@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
-
-import com.google.common.io.Resources;
 
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.nullValue
