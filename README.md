@@ -124,10 +124,23 @@ For example:
         password 'password'
         email 'me@mycompany.com'
     }
-    
-    
+
+
 ## Requirements
-* Gradle 1.10
+* Gradle 2.x
 * Docker 0.11+
 
 You need to have docker installed in order to build docker images. However if the `dryRun` task property is set to `true`  all calls to docker are disabled. In that case only the Dockerfile and its context directory will be created.
+#### Note to Gradle 1.x users
+The plugin is built with Gradle 2.x and thus needs version 2.0 or higher to work due to a newer version of Groovy version included in Gradle 2.x (2.3 vs. 1.8.6). To use the plugin with Gradle 1.x you have to add Groovy's upward compatibility patch by adding the following line to your build file:
+
+```gradle
+buildscript {
+    // ...
+    dependencies {
+         classpath 'se.transmode.gradle:gradle-docker:1.2'
+         classpath 'org.codehaus.groovy:groovy-backports-compat23:2.3.5'
+    }
+}
+```
+
