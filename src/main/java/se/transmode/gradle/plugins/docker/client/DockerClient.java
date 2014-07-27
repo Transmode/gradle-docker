@@ -13,22 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.transmode.gradle.plugins.docker
+package se.transmode.gradle.plugins.docker.client;
 
-class DockerPluginExtension {
-    String maintainer
-    String baseImage
-    String registry
+import java.io.File;
 
-    // path to the docker binary
-    String dockerBinary
-
-    // use docker REST api (with docker-java)
-    Boolean useApi
-
-    // docker host url & credentials
-    String hostUrl
-    String apiUsername
-    String apiEmail
-    String apiPassword
+public interface DockerClient {
+    public String buildImage(File buildDir, String tag);
+    public String pushImage(String tag);
 }

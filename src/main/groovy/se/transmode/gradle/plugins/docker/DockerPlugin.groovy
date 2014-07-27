@@ -56,7 +56,7 @@ class DockerPlugin implements Plugin<Project> {
                 addFile project.distTar.outputs.files.singleFile
 
                 def installDir = "/" + project.distTar.archiveName - ".${project.distTar.extension}"
-                entryPoint(["$installDir/bin/${project.applicationName}"])
+                entryPoint = ["$installDir/bin/${project.applicationName}"]
             }
         }
         logger.info("Adding docker task 'distDocker'");
@@ -70,9 +70,14 @@ class DockerPlugin implements Plugin<Project> {
     private DockerPluginExtension createExtension(Project project) {
         def extension = project.extensions.create(EXTENSION_NAME, DockerPluginExtension)
         extension.with {
-            maintainer = MAINTAINER_UNDEFINED
+            maintainer = ''
             dockerBinary = DOCKER_BINARY
-            registry = ""
+            registry = ''
+            useApi = Boolean.FALSE
+            hostUrl = ''
+            apiUsername = ''
+            apiEmail = ''
+            apiPassword = ''
         }
         logger.info("Adding docker extension");
         return extension
@@ -86,10 +91,17 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     private void applyTaskDefaults(task) {
+        // @todo: don't use conventionMapping as it is an internal mechanism
+        //        see http://forums.gradle.org/gradle/topics/how_do_you_use_a_conventionmapping_to_do_the_following
         task.conventionMapping.with {
             dockerBinary = { extension.dockerBinary }
             maintainer = { extension.maintainer }
             registry = { extension.registry }
+            useApi = { extension.useApi }
+            hostUrl = { extension.hostUrl }
+            apiUsername = { extension.apiUsername }
+            apiPassword = { extension.apiPassword }
+            apiEmail = { extension.apiEmail }
         }
     }
 }

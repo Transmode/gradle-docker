@@ -1,10 +1,14 @@
 apply plugin: 'docker'
 
 buildscript {
-    repositories { jCentral() }
+    repositories { mavenLocal(); jcenter() }
     dependencies {
         classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
 }
 
 group = 'org.acme'
@@ -14,8 +18,19 @@ docker {
 }
 
 task nginxDocker(type: Docker) {
+    // The default image tag contains the applicationName
     applicationName = 'nginx'
+
+    // Dockerfile instruction 'RUN'
     runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
     runCommand "apt-get update"
     runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
+
+    /* addFile accepts copySpec closure (like project.copy)
+       The source files are added to a tar archive which is then copied
+       into the image using the Dockerfile 'ADD' instruction. */
+    addFile {
+        from 'input'
+        into 'docs'
+    }
 }

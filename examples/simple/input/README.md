@@ -1,16 +1,4 @@
-# Gradle Docker Plugin Example
+# Lorem Ipsum
 
-This exampl is intended as an illustration on how to build runnable docker images with the gradle-docker plugin in conjunction with Gradle Java and Application plugins.
-
-## Example Application
-The source code in this example consists of a simple main method that starts a jetty webserver serving static html.
-
-## Requirements
-- JDK 1.7
-- Docker 0.6+
-
-## Instructions
-
-    cd example/
-    ./gradlew distDocker
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
