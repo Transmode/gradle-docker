@@ -49,6 +49,13 @@ task nginxDocker(type: Docker) {
 }
 ```
 
+## Building your Dockerfile
+In the example above the instructions on how to build the nginx Docker image are configured **inline** using methods of the Docker Gradle task. During task execution the plugin first creates a [Dockerfile](https://docs.docker.com/reference/builder/) which it then passes to Docker to build the image.
+
+However instead of defining the build instructions inline in the task it is possible to supply an **external Dockerfile**. If the task property `dockerfile` is set to the path of an existing Dockerfile the plugin will this instead of build the image.
+
+You can even combine these two methods: Supplying an external Dockerfile and extending it by defining instructions in the task. The build instructions from the external Dockerfile are read first and the instructions defined in the task appended. If an external Dockerfile is supplied, the `baseImage` property is ignored.
+
 ## Configuring the plugin
 The plugin exposes configuration options on 2 levels: globally through a plugin extension and on a per task basis. The plugin tries to always set sensible defaults for all properties.
 
