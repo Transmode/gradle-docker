@@ -22,13 +22,13 @@ class Dockerfile {
         this.instructions = instructions
     }
 
-    Dockerfile append(String instruction) {
-        this.instructions.add(instruction)
+    Dockerfile append(def instruction) {
+        this.instructions.add(instruction.toString())
         return this
     }
 
     Dockerfile appendAll(List instructions) {
-        this.instructions.addAll(instructions)
+        this.instructions.addAll(instructions*.toString())
         return this
     }
 
