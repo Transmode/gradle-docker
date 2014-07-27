@@ -16,13 +16,13 @@ Executing the `distDocker` task builds a docker image containing all application
 
 By default `distDocker` uses a base image with a Java runtime according to the project's `targetCompatibility` property. The docker image entry point is set to the start script created by the application plugin. Checkout the [example](example/) project.
 
-*Note: Only JVM based projects are supported.*
+**Note**: The creation of the convention task `distDocker` is currently only supported for JVM based application projects. If you are not using a JVM based application, use the task type `Docker` directly to create a task to build Docker images of your application.
 
 
-## Stand-alone
-The docker plugin introduces the task type `Docker`. A task of this type can be used to build Docker images. See the [Dockerfile documentation](http://docs.docker.com/reference/builder/) for information about how docker containers are built.
+## The `Docker`task
+The docker plugin introduces the task type `Docker`. A task of this type can be used to build and publish Docker images. See the [Dockerfile documentation](http://docs.docker.com/reference/builder/) for information about how Docker images are built.
 
-The following example builds a docker image for the popular reverse proxy nginx. The image will be tagged with the name `foo/nginx`. The example is taken from the official Dockerfile [examples](http://docs.docker.com/reference/builder/#dockerfile-examples):
+In the following example we build a Docker image in our Gradle build script for the popular reverse proxy nginx. The image will be tagged with the name `foo/nginx`. The example is taken from the official Dockerfile [examples](http://docs.docker.com/reference/builder/#dockerfile-examples):
 
 ```gradle
 apply plugin: 'docker'
@@ -50,7 +50,7 @@ task nginxDocker(type: Docker) {
 ```
 
 ## Configuring the plugin
-The plugin exposes configuration options on 2 levels: globally through a plugin extension and on a per task basis. The plugin tries to always set sensible defaults for all properties. (The `maintainer` property is an exception. It is initialized with a useless default string.)
+The plugin exposes configuration options on 2 levels: globally through a plugin extension and on a per task basis. The plugin tries to always set sensible defaults for all properties.
 
 ### Global configuration through plugin extension properties
 Configuration properties in the plugin extension `docker` are applied to all Docker tasks. Available properties are:
