@@ -4,6 +4,8 @@
 
 This plugin for [Gradle](http://www.gradle.org/) adds the capability to build und publish [Docker](http://docker.io/) images from the build script.
 
+See the [change log](CHANGELOG.md) for information about the latest changes.
+
 ## Extending the application plugin
 The gradle-docker plugin adds a task `distDocker` if the project already has the [application plugin](http://www.gradle.org/docs/current/userguide/application_plugin.html) applied:
 
@@ -30,7 +32,7 @@ apply plugin: 'docker'
 buildscript {
     repositories { jcenter() }
     dependencies {
-        classpath 'se.transmode.gradle:gradle-docker:1.1.1'
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
 }
 

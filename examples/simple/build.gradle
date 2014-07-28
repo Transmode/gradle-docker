@@ -3,7 +3,7 @@ apply plugin: 'docker'
 buildscript {
     repositories { mavenLocal(); jcenter() }
     dependencies {
-        classpath 'se.transmode.gradle:gradle-docker:1.2-SNAPSHOT'
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
 }
 
