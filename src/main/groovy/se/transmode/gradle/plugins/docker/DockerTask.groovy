@@ -27,27 +27,17 @@ import se.transmode.gradle.plugins.docker.client.JavaDockerClient
 import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 import se.transmode.gradle.plugins.docker.image.Dockerfile
 
-class DockerTask extends DefaultTask {
+class DockerTask extends DockerTaskBase {
 
     private static Logger logger = Logging.getLogger(DockerTask)
     public static final String DEFAULT_IMAGE = 'ubuntu'
 
-    // full path to the docker executable
-    String dockerBinary
     // Name and Email of the image maintainer
     String maintainer
-    // Name of the application being wrapped into a docker image (default: project.name)
-    String applicationName
-    // What to tag the created docker image with (default: group/applicationName)
-    String tag
-    // Which version to use along with the tag (default: latest)
-    String tagVersion
     // Whether or not to execute docker to build the image (default: false)
     Boolean dryRun
     // Whether or not to push the image into the registry (default: false)
     Boolean push
-    // Hostname, port of the docker image registry unless Docker index is used
-    String registry
 
     /**
      * Path to external Dockerfile
@@ -89,19 +79,9 @@ class DockerTask extends DefaultTask {
     // Tasks necessary to setup the stage before building an image
     def stageBacklog
     
-    // Should we use Docker's remote API instead of the docker executable
-    Boolean useApi
-    // URL of the remote Docker host (default: localhost)
-    String hostUrl
-    // Docker remote API credentials
-    String apiUsername
-    String apiPassword
-    String apiEmail
-
     DockerTask() {
         instructions = []
         stageBacklog = []
-        applicationName = project.name
         stageDir = new File(project.buildDir, "docker")
     }
 
@@ -174,14 +154,6 @@ class DockerTask extends DefaultTask {
         instructions.add("ENV ${key} ${value}")
     }
 
-    void setTagVersion(String version) {
-        tagVersion = version;
-    }
-
-    void setTagVersionToLatest() {
-        tagVersion = 'latest';
-    }
-
     void volume(String... paths) {
         instructions.add('VOLUME ["' + paths.join('", "') + '"]')
     }
@@ -252,47 +224,5 @@ class DockerTask extends DefaultTask {
         }
 
     }
-
-    private String getImageTag() {
-        String tag
-        tag = this.tag ?: getDefaultImageTag()
-        return appendImageTagVersion(tag)
-    }
-
-    private String getDefaultImageTag() {
-        String tag
-        if (registry) {
-            tag = "${-> registry}/${-> applicationName}"
-        } else if (project.group) {
-            tag = "${-> project.group}/${-> applicationName}"
-        } else {
-            tag = "${-> applicationName}"
-        }
-        return tag
-    }
-
-    private String appendImageTagVersion(String tag) {
-        def version = tagVersion ?: project.version
-        if(version == 'unspecified') {
-            version = 'latest'
-        }
-        return "${tag}:${version}"
-
-    }
-
-    private DockerClient getClient() {
-        DockerClient client
-        if(getUseApi()) {
-            logger.info("Using the Docker remote API.")
-            client = JavaDockerClient.create(
-                    getHostUrl(),
-                    getApiUsername(),
-                    getApiPassword(),
-                    getApiEmail())
-        } else {
-            logger.info("Using the native docker binary.")
-            client = new NativeDockerClient(getDockerBinary())
-        }
-        return client
-    }
+    
 }

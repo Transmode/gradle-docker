@@ -38,13 +38,13 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.google.guava:guava:17.0'
 
     compile 'com.google.guava:guava:17.0'
-    compile 'com.github.docker-java:docker-java:0.9.0'
+    compile 'com.github.docker-java:docker-java:0.9.1'
 
     testCompile 'junit:junit-dep:4.11'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
+    testCompile 'org.mockito:mockito-core:1.9.5'
 }
 
 task integTest(type: Test) {
