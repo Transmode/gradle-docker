@@ -157,7 +157,7 @@ docker {
 * Docker 0.11+
 
 #### Note to Gradle 1.x users
-The plugin is built with Gradle 2.x and thus needs version 2.0 or higher to work due to a newer version of Groovy version included in Gradle 2.x (2.3 vs. 1.8.6). To use the plugin with Gradle 1.x you have to add Groovy's upward compatibility patch by adding the following line to your build file:
+The plugin is built with Gradle 2.x and thus needs version 2.0 or higher to work due to a newer version of Groovy included in Gradle 2.x (2.3 vs. 1.8.6). To use the plugin with Gradle 1.x you have to add Groovy's upward compatibility patch by adding the following line to your build file:
 
 ```gradle
 buildscript {
