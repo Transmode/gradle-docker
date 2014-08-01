@@ -40,6 +40,11 @@ class Dockerfile {
         }
     }
 
+    def methodMissing(String name, args) {
+        // e.g. Dockerfile.add('source', 'dest') becomes "ADD source dest"
+        this.append("${name.toUpperCase()} ${args.join(' ')}")
+    }
+
     static Dockerfile fromExternalFile(File source) {
         def dockerfile = new Dockerfile()
         source.eachLine {

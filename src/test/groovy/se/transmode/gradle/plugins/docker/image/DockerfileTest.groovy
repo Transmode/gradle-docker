@@ -56,6 +56,17 @@ class DockerfileTest {
     }
 
     @Test
+    void missingMethodTest() {
+        def dockerfile = Dockerfile.fromBaseImage(BASE_IMAGE)
+        dockerfile.with {
+            expose 80
+            cmd '/bin/bash'
+        }
+        assertThat(dockerfile.instructions as ArrayList<String>,
+                equalTo(["FROM ${BASE_IMAGE}", "EXPOSE 80", "CMD /bin/bash", ]))
+    }
+
+    @Test
     void createFromFile() {
         File source = createTestDockerfile()
         def dockerfile = Dockerfile.fromExternalFile(source)
