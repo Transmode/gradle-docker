@@ -2,7 +2,7 @@
 
 [![Build Status](https://drone.io/github.com/Transmode/gradle-docker/status.png)](https://drone.io/github.com/Transmode/gradle-docker/latest) [ ![Download](https://api.bintray.com/packages/transmode/gradle-plugins/gradle-docker/images/download.png) ](https://bintray.com/transmode/gradle-plugins/gradle-docker/_latestVersion)
 
-This plugin for [Gradle](http://www.gradle.org/) adds the capability to build und publish [Docker](http://docker.io/) images from the build script.
+This plugin for [Gradle](http://www.gradle.org/) adds the capability to build und publish [Docker](http://docker.io/) images from the build script. It is available through [jCenter](https://bintray.com/transmode/gradle-plugins/gradle-docker/view) and  [MavenCentral](http://search.maven.org/#browse%7C566382288).
 
 See the [change log](CHANGELOG.md) for information about the latest changes.
 
@@ -54,7 +54,22 @@ task nginxDocker(type: Docker) {
 ## Building your Dockerfile
 In the example above the instructions on how to build the nginx Docker image are configured **inline** using methods of the Docker Gradle task. During task execution the plugin first creates a [Dockerfile](https://docs.docker.com/reference/builder/) which it then passes to Docker to build the image.
 
-However instead of defining the build instructions inline in the task it is possible to supply an **external Dockerfile**. If the task property `dockerfile` is set to the path of an existing Dockerfile the plugin will this instead of build the image.
+The available instructions are:
+
+| Dockerfile instruction | Gradle task method |
+| -----------------------|--------------------|
+| `ADD`                  | `addFile(Closure copySpec)`
+|                        | `addFile(String source, String dest)`
+|                        | `addFile(File source, String dest)`
+| `CMD`                  | `defaultCommand(List cmd)`
+| `ENTRYPOINT`           | `entryPoint(List entryPoint)`
+| `ENV`                  | `setEnvironment(String key, String val)`
+| `EXPOSE`               | `exposePort(Integer port)`
+| `RUN`                  | `runCommand(String cmd)`
+| `VOLUME`               | `volume(String... paths)`
+| `WORKDIR`              | `workingDir(String dir)`
+
+Instead of defining the build instructions inline in the task it is also possible to supply an **external Dockerfile**. If the task property `dockerfile` is set to the path of an existing Dockerfile the plugin will use this file instead to build the image.
 
 You can even combine these two methods: Supplying an external Dockerfile and extending it by defining instructions in the task. The build instructions from the external Dockerfile are read first and the instructions defined in the task appended. If an external Dockerfile is supplied, the `baseImage` property is ignored.
 
@@ -142,7 +157,7 @@ docker {
 * Docker 0.11+
 
 #### Note to Gradle 1.x users
-The plugin is built with Gradle 2.x and thus needs version 2.0 or higher to work due to a newer version of Groovy version included in Gradle 2.x (2.3 vs. 1.8.6). To use the plugin with Gradle 1.x you have to add Groovy's upward compatibility patch by adding the following line to your build file:
+The plugin is built with Gradle 2.x and thus needs version 2.0 or higher to work due to a newer version of Groovy included in Gradle 2.x (2.3 vs. 1.8.6). To use the plugin with Gradle 1.x you have to add Groovy's upward compatibility patch by adding the following line to your build file:
 
 ```gradle
 buildscript {
