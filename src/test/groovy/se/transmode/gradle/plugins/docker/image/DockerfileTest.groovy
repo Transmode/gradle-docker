@@ -20,6 +20,8 @@ import org.junit.rules.TemporaryFolder
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.is
+
 
 class DockerfileTest {
 
@@ -43,7 +45,7 @@ class DockerfileTest {
 
     @Test
     void createFromBase() {
-        assertThat(Dockerfile.fromBaseImage(BASE_IMAGE).instructions as ArrayList<GString>,
+        assertThat(Dockerfile.fromBaseImage(BASE_IMAGE).instructions,
                 equalTo(["FROM ${BASE_IMAGE}"]))
     }
 
@@ -51,26 +53,41 @@ class DockerfileTest {
     void createFromBaseAndAppend() {
         def dockerfile = Dockerfile.fromBaseImage(BASE_IMAGE)
         dockerfile.append(MAINTAINER)
-        assertThat(dockerfile.instructions as ArrayList<String>,
+        assertThat(dockerfile.instructions,
                 equalTo(["FROM ${BASE_IMAGE}", MAINTAINER]))
     }
 
     @Test
-    void missingMethodTest() {
-        def dockerfile = Dockerfile.fromBaseImage(BASE_IMAGE)
+    void fallbackToDefaultMethod() {
+        def dockerfile = new Dockerfile()
         dockerfile.with {
-            expose 80
-            cmd '/bin/bash'
+            foo('bar', 42)
+            bar 'All work and no play makes Jack a dull boy'
         }
-        assertThat(dockerfile.instructions as ArrayList<String>,
-                equalTo(["FROM ${BASE_IMAGE}", "EXPOSE 80", "CMD /bin/bash", ]))
+        assertThat(dockerfile.instructions,
+                equalTo(['FOO bar 42',
+                         'BAR All work and no play makes Jack a dull boy']))
+    }
+
+    @Test
+    void cmdWithString() {
+        def dockerfile = new Dockerfile()
+        dockerfile.cmd '/bin/bash'
+        assertThat dockerfile.instructions, is(equalTo(['CMD /bin/bash']))
+    }
+
+    @Test
+    void cmdWithList() {
+        def dockerfile = new Dockerfile()
+        dockerfile.cmd(['/bin/bash', '-i'])
+        assertThat dockerfile.instructions, is(equalTo(['CMD ["/bin/bash", "-i"]']))
     }
 
     @Test
     void createFromFile() {
         File source = createTestDockerfile()
         def dockerfile = Dockerfile.fromExternalFile(source)
-        assertThat(dockerfile.instructions as ArrayList<String>,
+        assertThat(dockerfile.instructions,
                 equalTo(INSTRUCTIONS))
     }
 

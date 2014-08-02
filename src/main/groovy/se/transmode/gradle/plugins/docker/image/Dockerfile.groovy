@@ -15,7 +15,12 @@
  */
 package se.transmode.gradle.plugins.docker.image
 
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+
 class Dockerfile {
+    private static Logger log = Logging.getLogger(Dockerfile)
+
     List<String> instructions
 
     Dockerfile(List<String> instructions=[]) {
@@ -40,9 +45,18 @@ class Dockerfile {
         }
     }
 
+    /**
+     * Default method if method not found to support all Dockerfile instructions.
+     *
+     * Example: foo('bar', 42) becomes "FOO bar 42"
+     */
     def methodMissing(String name, args) {
-        // e.g. Dockerfile.add('source', 'dest') becomes "ADD source dest"
+        log.debug('No method for "{}({})" found. Falling back on default method.', name, args.join(', '))
         this.append("${name.toUpperCase()} ${args.join(' ')}")
+    }
+
+    void cmd(List cmd) {
+        this.append('CMD ["' + cmd.join('", "') + '"]')
     }
 
     static Dockerfile fromExternalFile(File source) {
