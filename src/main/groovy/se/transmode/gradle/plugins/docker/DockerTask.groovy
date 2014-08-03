@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.io.Files
-
-import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
-
 import se.transmode.gradle.plugins.docker.client.DockerClient
-import se.transmode.gradle.plugins.docker.client.JavaDockerClient
-import se.transmode.gradle.plugins.docker.client.NativeDockerClient
 import se.transmode.gradle.plugins.docker.image.Dockerfile
 
 class DockerTask extends DockerTaskBase {
@@ -200,11 +195,15 @@ class DockerTask extends DockerTaskBase {
         def baseDockerfile
         if (getDockerfile()) {
             logger.info('Creating Dockerfile from file {}.', dockerfile)
-            baseDockerfile = Dockerfile.fromExternalFile(dockerfile)
+            baseDockerfile = new Dockerfile(dockerfile,
+                    { -> project.file(it) },
+                    { -> project.copy(it) })
         } else {
             def baseImage = determineBaseImage()
             logger.info('Creating Dockerfile from base {}.', baseImage)
-            baseDockerfile = Dockerfile.fromBaseImage(baseImage)
+            baseDockerfile = new Dockerfile(baseImage,
+                    { -> project.file(it) },
+                    { -> project.copy(it) })
         }
         if (getMaintainer()) {
             baseDockerfile.append("MAINTAINER ${getMaintainer()}")

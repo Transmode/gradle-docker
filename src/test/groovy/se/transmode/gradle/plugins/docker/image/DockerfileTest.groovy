@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-
 class DockerfileTest {
 
     public static final String BASE_IMAGE = 'ubuntu:14.04'
@@ -45,16 +44,16 @@ class DockerfileTest {
 
     @Test
     void createFromBase() {
-        assertThat(Dockerfile.fromBaseImage(BASE_IMAGE).instructions,
-                equalTo(["FROM ${BASE_IMAGE}"]))
+        assertThat(new Dockerfile(BASE_IMAGE).instructions,
+                equalTo(["FROM ${BASE_IMAGE}".toString()]))
     }
 
     @Test
     void createFromBaseAndAppend() {
-        def dockerfile = Dockerfile.fromBaseImage(BASE_IMAGE)
+        def dockerfile = new Dockerfile(BASE_IMAGE)
         dockerfile.append(MAINTAINER)
         assertThat(dockerfile.instructions,
-                equalTo(["FROM ${BASE_IMAGE}", MAINTAINER]))
+                equalTo(["FROM ${BASE_IMAGE}".toString(), MAINTAINER]))
     }
 
     @Test
@@ -86,7 +85,7 @@ class DockerfileTest {
     @Test
     void createFromFile() {
         File source = createTestDockerfile()
-        def dockerfile = Dockerfile.fromExternalFile(source)
+        def dockerfile = new Dockerfile(source)
         assertThat(dockerfile.instructions,
                 equalTo(INSTRUCTIONS))
     }
@@ -94,9 +93,37 @@ class DockerfileTest {
     @Test
     void createFromFileAndAppend() {
         File source = createTestDockerfile()
-        def dockerfile = Dockerfile.fromExternalFile(source)
+        def dockerfile = new Dockerfile(source)
         dockerfile.append(MAINTAINER)
         assertThat(dockerfile.instructions,
                 equalTo(INSTRUCTIONS + [MAINTAINER]))
     }
-}
+
+    @Test
+    void addUrl() {
+        final Dockerfile dockerfile = new Dockerfile()
+        final String url = 'http://foo.bar/file.tar'
+
+        dockerfile.add url, '/target'
+        assertThat dockerfile.instructions, is(equalTo(["ADD ${url} /target".toString()]))
+    }
+
+
+    @Test
+    void addFile() {
+        final Dockerfile dockerfile = new Dockerfile()
+        final File file = new File('/tmp/adke')
+
+        dockerfile.add file, '/target'
+        assertThat dockerfile.instructions, is(equalTo(["ADD ${file.name} /target".toString()]))
+    }
+
+    @Test
+    void addFileAsString() {
+        final Dockerfile dockerfile = new Dockerfile()
+        final String file = '/tmp/asdrisd'
+
+        dockerfile.add file, '/target'
+        assertThat dockerfile.instructions, is(equalTo(["ADD ${file} /target".toString()]))
+    }
+ }
