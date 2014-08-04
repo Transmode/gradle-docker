@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -26,7 +25,6 @@ class DockerPlugin implements Plugin<Project> {
     private static Logger logger = Logging.getLogger(DockerPlugin)
 
     private static final String DOCKER_BINARY = "docker"
-    private static final String MAINTAINER_UNDEFINED = "undefined <email@undefined>"
     static final String EXTENSION_NAME = "docker"
 
     DockerPluginExtension extension
@@ -34,17 +32,16 @@ class DockerPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         this.extension = createExtension(project)
-    addDockerTaskType(project)
-
-        // FIXME: Application plugin must be applied before docker plugin for this to work.
-        // FIXME: Check for application AND java plugin
-        project.plugins.withType(ApplicationPlugin.class).all {
+        addDockerTaskType(project)
+        project.plugins.withType(ApplicationPlugin).all {
+            logger.info('Detected application plugin.')
             addDistDockerTask(project)
         }
         configureDockerTasks(project)
     }
 
     private void addDistDockerTask(Project project) {
+        logger.info('Adding docker task "distDocker"');
         project.task('distDocker', type: DockerTask) {
             group = 'docker'
             description = "Packs the project's JVM application as a Docker image."
@@ -59,12 +56,11 @@ class DockerPlugin implements Plugin<Project> {
                 entryPoint = ["$installDir/bin/${project.applicationName}"]
             }
         }
-        logger.info("Adding docker task 'distDocker'");
     }
 
     private void addDockerTaskType(Project project) {
-        project.ext.Docker = DockerTask.class
         logger.info("Adding docker task type");
+        project.ext.Docker = DockerTask.class
     }
 
     private DockerPluginExtension createExtension(Project project) {
@@ -85,9 +81,9 @@ class DockerPlugin implements Plugin<Project> {
 
     private void configureDockerTasks(Project project) {
         project.tasks.withType(DockerTask.class).all { task ->
+            logger.info('Applying docker defaults to task {}', task.name);
             applyTaskDefaults(task)
         }
-        logger.info("Applying docker defaults to tasks of type 'Docker'");
     }
 
     private void applyTaskDefaults(task) {
