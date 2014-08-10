@@ -7,5 +7,5 @@ This example is intended as an simple illustration on how to build docker images
 
 ## Instructions
 
-    ./gradlew dockerImg 
+    ./gradlew nginxDocker
 
