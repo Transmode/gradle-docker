@@ -137,4 +137,12 @@ class DockerTaskTest {
                         "MAINTAINER ${TEST_MAINTAINER}".toString(),
                         "ENV ${TEST_ENV.join(' ')}".toString()))
     }
+
+    @Test
+    public void switchUser() {
+        def task = createTask(createProject())
+        task.switchUser('junit')
+        assertThat "USER junit".toString(), isIn(task.buildDockerfile().instructions)
+    }
+
 }
