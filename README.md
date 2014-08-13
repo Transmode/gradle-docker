@@ -66,6 +66,7 @@ The available instructions are:
 | `ENV`                  | `setEnvironment(String key, String val)`
 | `EXPOSE`               | `exposePort(Integer port)`
 | `RUN`                  | `runCommand(String cmd)`
+| `USER`                 | `switchUser(String userNameOrUid)`
 | `VOLUME`               | `volume(String... paths)`
 | `WORKDIR`              | `workingDir(String dir)`
 

@@ -166,6 +166,10 @@ class DockerTask extends DefaultTask {
         instructions.add("EXPOSE ${port}")
     }
 
+    void switchUser(String userName) {
+        instructions.add("USER ${userName}")
+    }
+
     void setEnvironment(String key, String value) {
         instructions.add("ENV ${key} ${value}")
     }
