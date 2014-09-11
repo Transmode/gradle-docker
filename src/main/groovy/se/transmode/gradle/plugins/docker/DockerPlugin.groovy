@@ -33,11 +33,13 @@ class DockerPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.extension = createExtension(project)
         addDockerTaskType(project)
+        addDockerRunTaskType(project)
         project.plugins.withType(ApplicationPlugin).all {
             logger.info('Detected application plugin.')
             addDistDockerTask(project)
         }
         configureDockerTasks(project)
+        configureDockerRunTasks(project)
     }
 
     private void addDistDockerTask(Project project) {
@@ -63,6 +65,11 @@ class DockerPlugin implements Plugin<Project> {
         project.ext.Docker = DockerTask.class
     }
 
+    private void addDockerRunTaskType(Project project) {
+        project.ext.DockerRun = DockerRunTask.class
+        logger.info("Adding docker run task type");
+    }
+
     private DockerPluginExtension createExtension(Project project) {
         def extension = project.extensions.create(EXTENSION_NAME, DockerPluginExtension)
         extension.with {
@@ -86,12 +93,33 @@ class DockerPlugin implements Plugin<Project> {
         }
     }
 
+    private void configureDockerRunTasks(Project project) {
+        project.tasks.withType(DockerRunTask.class).all { task ->
+            applyRunTaskDefaults(task)
+        }
+        logger.info("Applying docker defaults to tasks of type 'DockerRun'");
+    }
+
     private void applyTaskDefaults(task) {
         // @todo: don't use conventionMapping as it is an internal mechanism
         //        see http://forums.gradle.org/gradle/topics/how_do_you_use_a_conventionmapping_to_do_the_following
         task.conventionMapping.with {
             dockerBinary = { extension.dockerBinary }
             maintainer = { extension.maintainer }
+            registry = { extension.registry }
+            useApi = { extension.useApi }
+            hostUrl = { extension.hostUrl }
+            apiUsername = { extension.apiUsername }
+            apiPassword = { extension.apiPassword }
+            apiEmail = { extension.apiEmail }
+        }
+    }
+    
+    private void applyRunTaskDefaults(task) {
+        // @todo: don't use conventionMapping as it is an internal mechanism
+        //        see http://forums.gradle.org/gradle/topics/how_do_you_use_a_conventionmapping_to_do_the_following
+        task.conventionMapping.with {
+            dockerBinary = { extension.dockerBinary }
             registry = { extension.registry }
             useApi = { extension.useApi }
             hostUrl = { extension.hostUrl }

@@ -15,7 +15,12 @@
  */
 package se.transmode.gradle.plugins.docker.client
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.base.Preconditions
+
+import org.apache.commons.lang.StringUtils;
 import org.gradle.api.GradleException
 
 class NativeDockerClient implements DockerClient {
@@ -43,11 +48,56 @@ class NativeDockerClient implements DockerClient {
 
     private static String executeAndWait(String cmdLine) {
         def process = cmdLine.execute()
-        process.waitFor()
+        process.waitForProcessOutput(System.out, System.err)
         if (process.exitValue()) {
-            throw new GradleException("Docker execution failed\nCommand line [${cmdLine}] returned:\n${process.err.text}")
+            throw new GradleException("Docker execution failed\nCommand line [${cmdLine}]")
         }
-        return process.in.text
+        return "Done"
+    }
+
+    @Override
+    String run(String tag, String containerName, boolean detached, boolean autoRemove, 
+            Map<String, String> env,
+            Map<String, String> ports, Map<String, String> volumes, List<String> volumesFrom,
+            List<String> links) {
+        Preconditions.checkArgument(tag as Boolean,  "Image tag cannot be empty or null.")
+        Preconditions.checkArgument(containerName as Boolean,  "Image name cannot be empty or null.")
+        Preconditions.checkArgument(env != null,  "Environment map cannot be null.")
+        Preconditions.checkArgument(ports != null,  "Exported port map cannot be null.")
+        Preconditions.checkArgument(volumes != null,  "Volume map cannot be null.")
+        Preconditions.checkArgument(volumesFrom != null,  "Volumes from list cannot be null.")
+        Preconditions.checkArgument(links != null,  "Link list cannot be null.")
+        Preconditions.checkArgument(!detached || !autoRemove,
+            "Cannot set both detached and autoRemove options to true.");
+
+        def detachedArg = detached ? '-d' : ''
+        def removeArg = autoRemove ? '--rm' : ''
+        def cmdLine = "${binary} run ${detachedArg} ${removeArg} --name ${containerName}"
+        cmdLine = appendArguments(cmdLine, env, "--env", '=')
+        cmdLine = appendArguments(cmdLine, ports, "--publish")
+        cmdLine = appendArguments(cmdLine, volumes, "--volume")
+        cmdLine = appendArguments(cmdLine, volumesFrom, "--volumes-from")
+        cmdLine = appendArguments(cmdLine, links, "--link")
+        cmdLine = "${cmdLine} ${tag}"
+        return executeAndWait(cmdLine)
+    }
+
+    private String appendArguments(String cmdLine, Map<String, String> map, String option, 
+            String separator = ':') {
+        // Add each entry in the map as the indicated argument
+        map.each { key, value ->
+            cmdLine = "${cmdLine} ${option} ${key}${separator}${value}"
+        }
+        return cmdLine
+    }
+
+            
+    private String appendArguments(String cmdLine, List<String> list, String option) {
+        // Add each entry in the map as the indicated argument
+        list.each {
+            cmdLine = "${cmdLine} ${option} ${it}"
+        }
+        return cmdLine
     }
 
 }
