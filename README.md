@@ -82,7 +82,7 @@ Configuration properties in the plugin extension `docker` are applied to all Doc
  - `dockerBinary` - The path to the docker binary.
  - `baseImage` - The base docker image used when building images (i.e. the name after `FROM` in the Dockerfile).
  - `maintainer` - The name and email address of the image maintainer.
- - `registry` - The hostname and port of the Docker image registry unless the official Docker index is used.
+ - `registry` - The hostname and port of the Docker image registry unless the Docker Hub Registry is used.
  - `useApi` - Use the Docker Remote API instead of a locally installed `docker` binary. See [below](https://github.com/Transmode/gradle-docker/blob/master/README.md#docker-remote-api)
 
 Example to set the base docker image and maintainer name for all tasks:
@@ -144,7 +144,7 @@ For example:
 ```gradle
 docker {
     useApi true
-    hostUrl 'http://myserver:4243`
+    hostUrl 'http://myserver:4243'
     apiUsername 'user'
     apiPassword 'password'
     apiEmail 'me@mycompany.com'
