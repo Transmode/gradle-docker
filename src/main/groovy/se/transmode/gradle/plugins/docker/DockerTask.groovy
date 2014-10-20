@@ -46,7 +46,7 @@ class DockerTask extends DefaultTask {
     Boolean dryRun
     // Whether or not to push the image into the registry (default: false)
     Boolean push
-    // Hostname, port of the docker image registry unless Docker index is used
+    // Hostname, port of the docker image registry unless Docker Registry Hub is used
     String registry
 
     /**
