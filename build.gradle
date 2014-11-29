@@ -53,6 +53,8 @@ task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
 
+    reports.html.destination = file("${reporting.baseDir}/integTests")
+    reports.junitXml.destination = file("$buildDir/integTest-results")
 }
 
 // run integration tests after unit tests if both are scheduled for execution
