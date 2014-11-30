@@ -33,4 +33,5 @@ task nginxDocker(type: Docker) {
         from 'input'
         into 'docs'
     }
+    defaultCommand("/bin/bash")
 }
