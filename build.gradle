@@ -72,6 +72,14 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+/* Workaround for JDK bug (https://bugs.openjdk.java.net/browse/JDK-8051012)
+   regression bug in 7u65, fixed in 7u80 and 8u40
+ */
+compileTestGroovy.groovyOptions.forkOptions.jvmArgs = ['-noverify']
+test.jvmArgs '-noverify'
+integTest.jvmArgs '-noverify'
+
+
 artifacts {
     archives jar
     archives javadocJar
