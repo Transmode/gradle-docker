@@ -41,30 +41,28 @@ class Dockerfile {
     }
 
     // fixme: do we really need a no-args constructor?
-    Dockerfile() {
+    Dockerfile(resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
         this.baseInstructions = []
         this.instructions = []
         this.contextDir
         this.stagingBacklog = []
+        this.resolvePathLamba = resolvePathLambda
+        this.copyLambda = copyLambda
     }
 
     Dockerfile(String base,
                resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
-        this()
+        this(resolvePathLambda, copyLambda)
         from base
-        this.resolvePathLamba = resolvePathLambda
-        this.copyLambda = copyLambda
     }
 
     Dockerfile(File externalDockerfile,
                resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
-        this()
+        this(resolvePathLambda, copyLambda)
         if(externalDockerfile.isFile()) {
             this.contextDir = externalDockerfile.parentFile
         }
         from externalDockerfile
-        this.resolvePathLamba = resolvePathLambda
-        this.copyLambda = copyLambda
     }
 
     Dockerfile append(def instruction) {
@@ -91,7 +89,8 @@ class Dockerfile {
      * Example: foo('bar', 42) becomes "FOO bar 42"
      */
     def methodMissing(String name, args) {
-        log.debug('No method for "{}({})" found. Falling back on default method.', name, args.join(', '))
+        // fixme: check for case insensitive method name match before falling back to default method
+        log.debug('No explicit method declaration for "{}({})" found. Using default implementation.', name, args.join(', '))
         this.append("${name.toUpperCase()} ${args.join(' ')}")
     }
 
@@ -177,6 +176,11 @@ class Dockerfile {
         )
     }
 
+    /**
+     * Get the contents of the Dockerfile row by row as a list of strings.
+     *
+     * @return Dockerfile instructions as a list of Strings.
+     */
     List<String> getInstructions() {
         return (baseInstructions + instructions)*.toString()
     }

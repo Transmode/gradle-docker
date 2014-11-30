@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-
-import org.junit.Test
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.api.Project
-import static org.junit.Assert.*
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
+
 import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.containsInAnyOrder
+import static org.junit.Assert.assertThat
 
 
 class CreateDockerfileTest {
     @Test
-    public void compareDockFile() {
+    public void compareDockerfileBuiltOldstyle() {
         Project project = ProjectBuilder.builder().build()
         project.apply plugin: 'docker'
 
@@ -42,11 +43,40 @@ class CreateDockerfileTest {
 
         task.runCommand 'apt-get install -y inotify-tools nginx apache2 openssh-server'
 
+        task.defaultCommand(["/bin/bash"])
+
         def expected = []
         this.getClass().getClassLoader().getResource("nginx.Dockerfile").eachLine { expected << it.toString() }
         def actual = task.buildDockerfile().instructions.each { it.toString() }
 
         assertThat actual[0].toString(), equalToIgnoringCase('from ubuntu')
+        assertThat actual, containsInAnyOrder(*expected)
+    }
+
+    @Test
+    public void compareDockerfileBuiltWithDSL() {
+        Project project = ProjectBuilder.builder().build()
+        project.apply plugin: 'docker'
+
+        def task = project.task('docker', type: DockerTask)
+
+        // don't actually execute docker, just build Dockerfile
+        task.dockerBinary = "/bin/true"
+
+        task.maintainer 'Guillaume J. Charmes "guillaume@dotcloud.com"'
+        task.dockerfile {
+            from 'ubuntu'
+            run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
+            run 'apt-get update'
+            run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
+            cmd(['/bin/bash'])
+        }
+
+        def expected = []
+        this.getClass().getClassLoader().getResource("nginx.Dockerfile").eachLine { expected << it.toString() }
+        def actual = task.buildDockerfile().instructions.each { it.toString() }
+
+        assertThat actual[0], equalToIgnoringCase('from ubuntu')
         assertThat actual, containsInAnyOrder(*expected)
     }
 }
