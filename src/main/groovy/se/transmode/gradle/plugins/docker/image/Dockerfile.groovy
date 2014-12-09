@@ -94,12 +94,13 @@ class Dockerfile {
         this.append("${name.toUpperCase()} ${args.join(' ')}")
     }
 
+    // todo: consider removing "extendDockerfile" as method and add it as a parameter to dockerfile DockerTask.dockerfile as it is not a real Dockerfile instruction
     /**
      * Add instructions from an external Dockerfile.
      *
      * @param baseFile -- Path to external Dockerfile
      */
-    void from(File baseFile) {
+    void extendDockerfile(File baseFile) {
         baseInstructions = baseFile as String[]
     }
 
@@ -187,5 +188,14 @@ class Dockerfile {
      */
     List<String> getInstructions() {
         return (baseInstructions + instructions)*.toString()
+    }
+
+    /**
+     * Return true if base image or base dockerfile to extend has been defined.
+     *
+     * @return Boolean true if base is set
+     */
+    Boolean hasBase() {
+        return baseInstructions.size() > 0
     }
 }

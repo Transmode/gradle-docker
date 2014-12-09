@@ -131,18 +131,20 @@ class DockerTaskTest {
         def project = createProject()
         def task = createTask(project)
         // write base dockerfile to file
-        def dockerfile = testFolder.newFile('Dockerfile')
-        dockerfile.withWriter { out ->
+        def externalDockerfile = testFolder.newFile('Dockerfile')
+        externalDockerfile.withWriter { out ->
             TEST_INSTRUCTIONS.each { out.writeLine(it) }
         }
-        task.dockerfile = dockerfile
+        task.setDockerfile externalDockerfile
         // add instructions to dockerfile
         task.maintainer = TEST_MAINTAINER
         task.setEnvironment(*TEST_ENV)
-        assertThat(task.buildDockerfile().instructions,
+
+        def actual = task.buildDockerfile().instructions
+        assertThat(actual,
                 contains(*TEST_INSTRUCTIONS,
-                        "MAINTAINER ${TEST_MAINTAINER}".toString(),
-                        "ENV ${TEST_ENV.join(' ')}".toString()))
+                        "ENV ${TEST_ENV.join(' ')}".toString(),
+                        "MAINTAINER ${TEST_MAINTAINER}".toString()))
     }
 
     @Test

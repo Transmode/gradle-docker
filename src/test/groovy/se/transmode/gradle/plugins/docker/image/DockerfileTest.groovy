@@ -83,17 +83,18 @@ class DockerfileTest {
     }
 
     @Test
-    void createFromFile() {
+    void extendDockerfile() {
         File source = createTestDockerfile()
-        def dockerfile = new Dockerfile(source)
-        assertThat(dockerfile.instructions,
-                equalTo(INSTRUCTIONS))
+        final dockerfile = new Dockerfile()
+        dockerfile.extendDockerfile(source)
+        assertThat(dockerfile.instructions, is(equalTo(INSTRUCTIONS)))
     }
 
     @Test
-    void createFromFileAndAppend() {
+    void extendDockerfileAndAppend() {
         File source = createTestDockerfile()
-        def dockerfile = new Dockerfile(source)
+        final dockerfile = new Dockerfile()
+        dockerfile.extendDockerfile(source)
         dockerfile.append(MAINTAINER)
         assertThat(dockerfile.instructions,
                 equalTo(INSTRUCTIONS + [MAINTAINER]))
