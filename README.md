@@ -2,7 +2,7 @@
 
 [![Build Status](https://drone.io/github.com/Transmode/gradle-docker/status.png)](https://drone.io/github.com/Transmode/gradle-docker/latest) [ ![Download](https://api.bintray.com/packages/transmode/gradle-plugins/gradle-docker/images/download.png) ](https://bintray.com/transmode/gradle-plugins/gradle-docker/_latestVersion)
 
-This plugin for [Gradle](http://www.gradle.org/) adds the capability to build und publish [Docker](http://docker.io/) images from the build script. It is available through [jCenter](https://bintray.com/transmode/gradle-plugins/gradle-docker/view) and  [MavenCentral](http://search.maven.org/#browse%7C566382288).
+This plugin for [Gradle](http://www.gradle.org/) adds the capability to build and publish [Docker](http://docker.io/) images from the build script. It is available through [jCenter](https://bintray.com/transmode/gradle-plugins/gradle-docker/view) and  [MavenCentral](http://search.maven.org/#browse%7C566382288).
 
 See the [change log](CHANGELOG.md) for information about the latest changes.
 
