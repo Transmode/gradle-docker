@@ -116,6 +116,10 @@ class Dockerfile {
         this.append('CMD ["' + cmd.join('", "') + '"]')
     }
 
+    void entrypoint(List cmd) {
+        this.append('ENTRYPOINT ["' + cmd.join('", "') + '"]')
+    }
+
     void add(String source, String destination='/') {
         if(isUrl(source)) {
             this.append("ADD ${source} ${destination}")

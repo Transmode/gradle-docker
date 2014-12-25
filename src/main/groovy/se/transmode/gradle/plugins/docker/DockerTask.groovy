@@ -36,6 +36,9 @@ class DockerTask extends DockerTaskBase {
 
     Dockerfile dockerfile
 
+    @Delegate(deprecated=true)
+    LegacyDockerfileMethods legacyMethods
+
     public void dockerfile(Closure closure) {
         dockerfile.with(closure)
     }
@@ -83,6 +86,7 @@ class DockerTask extends DockerTaskBase {
         stageBacklog = []
         dockerfile = new Dockerfile({ -> project.file(it) }, { -> project.copy(it) })
         stageDir = new File(project.buildDir, "docker")
+        legacyMethods = new LegacyDockerfileMethods(dockerfile)
     }
 
     void addFile(String source, String destination='/') {
@@ -129,76 +133,7 @@ class DockerTask extends DockerTaskBase {
                 basedir: tmpDir
         )
     }
-
-    void workingDir(String wd) {
-        instructions.add("WORKDIR ${wd}")
-    }
-
-    void addInstruction(String cmd, String value) {
-        instructions.add("${cmd} ${value}")
-    }
-
-    void runCommand(String command) {
-        instructions.add("RUN ${command}")
-    }
-
-    void exposePort(Integer port) {
-        instructions.add("EXPOSE ${port}")
-    }
-
-    void exposePort(String port) {
-        instructions.add("EXPOSE ${port}")
-    }
-
-    void switchUser(String userName) {
-        instructions.add("USER ${userName}")
-    }
-
-    void setEnvironment(String key, String value) {
-        instructions.add("ENV ${key} ${value}")
-    }
-
-    void volume(String... paths) {
-        instructions.add('VOLUME ["' + paths.join('", "') + '"]')
-    }
-
-    void setEntryPoint(List entryPoint) {
-        instructions.add('ENTRYPOINT ["' + entryPoint.join('", "') + '"]')
-    }
-
-    void entryPoint(List entryPoint) {
-        this.setEntryPoint(entryPoint)
-    }
-
-    @Deprecated
-    /**
-     * Set the default command of the Docker image ('CMD' in Dockerfile). Deprecated.
-     *
-     * Use the new dockerfile API instead:
-     *   dockerfile {
-     *     cmd 'your-command'
-     *   }
-     *
-     */
-    void setDefaultCommand(List cmd) {
-        logger.warn('The setDefaultCommand method has been deprecated and is scheduled to be removed. Use dockerfile.cmd instead.')
-        dockerfile.cmd(cmd)
-    }
-
-    @Deprecated
-    /**
-     * Set the default command of the Docker image ('CMD' in Dockerfile). Deprecated.
-     *
-     * Use the new dockerfile API instead:
-     *   dockerfile {
-     *     cmd 'your-command'
-     *   }
-     *
-     */
-    void defaultCommand(List cmd) {
-        this.setDefaultCommand(cmd)
-    }
-
+    
     void contextDir(String contextDir) {
         stageDir = new File(stageDir, contextDir)
     }
