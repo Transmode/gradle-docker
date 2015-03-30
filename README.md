@@ -16,7 +16,7 @@ apply plugin: 'docker'
 
 Executing the `distDocker` task builds a docker image containing all application files (libs, scripts, etc.) created by the `distTar` task from the application plugin. If you already use the application plugin to package your project then the docker plugin will add simple docker image building to your project.
 
-By default `distDocker` uses a base image with a Java runtime according to the project's `targetCompatibility` property. The docker image entry point is set to the start script created by the application plugin. Checkout the [example](example/) project.
+By default `distDocker` uses a base image with a Java runtime according to the project's `targetCompatibility` property. The docker image entry point is set to the start script created by the application plugin. Checkout the [application example](examples/application/) project.
 
 **Note**: The creation of the convention task `distDocker` is currently only supported for JVM based application projects. If you are not using a JVM based application, use the task type `Docker` directly to create a task to build Docker images of your application.
 
