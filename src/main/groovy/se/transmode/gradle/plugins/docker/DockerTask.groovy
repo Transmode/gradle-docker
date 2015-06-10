@@ -146,6 +146,10 @@ class DockerTask extends DockerTaskBase {
         instructions.add("EXPOSE ${port}")
     }
 
+    void exposePort(String port) {
+        instructions.add("EXPOSE ${port}")
+    }
+
     void switchUser(String userName) {
         instructions.add("USER ${userName}")
     }

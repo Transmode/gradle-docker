@@ -65,6 +65,7 @@ The available instructions are:
 | `ENTRYPOINT`           | `entryPoint(List entryPoint)`
 | `ENV`                  | `setEnvironment(String key, String val)`
 | `EXPOSE`               | `exposePort(Integer port)`
+|                        | `exposePort(String port)`
 | `RUN`                  | `runCommand(String cmd)`
 | `USER`                 | `switchUser(String userNameOrUid)`
 | `VOLUME`               | `volume(String... paths)`
