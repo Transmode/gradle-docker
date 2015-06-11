@@ -1,8 +1,0 @@
-apply plugin: 'license'
-
-license {
-    header rootProject.file('codequality/HEADER')
-    ext.year = Calendar.getInstance().get(Calendar.YEAR)
-    ext.name = 'Transmode AB'
-    exclude '**/*.txt'
-}

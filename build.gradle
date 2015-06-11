@@ -9,7 +9,6 @@ repositories {
     jcenter()
 }
 
-apply from: file('gradle/license.gradle')
 apply from: file('gradle/idea.gradle')
 apply from: file('gradle/publish.gradle')
 
