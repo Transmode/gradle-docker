@@ -31,21 +31,23 @@ class CreateDockerfileTest {
         def task = project.task('docker', type: DockerTask)
 
         // don't actually execute docker, just build Dockerfile
-        task.dockerBinary = "/bin/true"
+        task.dockerBinary = '/bin/true'
 
         // example pulled from "http://docs.docker.io/en/latest/use/builder/#dockerfile-examples"
-        task.baseImage "ubuntu"
+        task.baseImage 'ubuntu'
         task.maintainer 'Guillaume J. Charmes "guillaume@dotcloud.com"'
 
         task.runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
-        task.runCommand "apt-get update"
+        task.runCommand 'apt-get update'
 
-        task.runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
+        task.runCommand 'apt-get install -y inotify-tools nginx apache2 openssh-server'
 
-        def expectedDockerFile = this.getClass().getResource("nginx.Dockerfile").text.trim()
-        def actualDockerFile = task.buildDockerfile().instructions.join(System.getProperty('line.separator'))
+        def expected = []
+        this.getClass().getClassLoader().getResource("nginx.Dockerfile").eachLine { expected << it.toString() }
+        def actual = task.buildDockerfile().instructions.each { it.toString() }
 
-        assertThat actualDockerFile, is(equalTo(expectedDockerFile))
+        assertThat actual[0].toString(), equalToIgnoringCase('from ubuntu')
+        assertThat actual, containsInAnyOrder(*expected)
     }
 }
 

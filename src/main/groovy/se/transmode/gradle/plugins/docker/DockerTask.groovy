@@ -182,7 +182,7 @@ class DockerTask extends DockerTaskBase {
         stageDir = new File(stageDir, contextDir)
     }
 
-    private File createDirIfNotExists(File dir) {
+    protected File createDirIfNotExists(File dir) {
         if (!dir.exists())
             dir.mkdirs()
         return dir
