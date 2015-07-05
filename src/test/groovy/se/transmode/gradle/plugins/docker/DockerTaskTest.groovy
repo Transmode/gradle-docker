@@ -121,9 +121,9 @@ class DockerTaskTest {
         
         // Confirm that the directory was copied under the staging dir
         File targetDir = new File(task.stageDir, TEST_TARGET_DIR)
-        assertThat(targetDir.exists(), equalTo(true))
-        assertThat(targetDir.isDirectory(), equalTo(true))
-        assertThat(targetDir.list().length, equalTo(dir.list().length))
+        assertThat(targetDir.exists(), is(true))
+        assertThat(targetDir.isDirectory(), is(true))
+        assertThat(targetDir.list().length, is(equalTo(dir.list().length)))
     }
 
     @Test
