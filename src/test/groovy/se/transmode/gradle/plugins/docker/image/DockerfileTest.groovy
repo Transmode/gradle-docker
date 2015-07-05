@@ -43,22 +43,27 @@ class DockerfileTest {
     }
 
     @Test
-    void createFromBase() {
-        assertThat(new Dockerfile(BASE_IMAGE).instructions,
+    void fromBase() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.from(BASE_IMAGE)
+        assertThat(dockerfile.instructions,
                 equalTo(["FROM ${BASE_IMAGE}".toString()]))
     }
 
     @Test
-    void createFromBaseAndAppend() {
-        def dockerfile = new Dockerfile(BASE_IMAGE)
-        dockerfile.append(MAINTAINER)
+    void appendInstruction() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.with {
+            from BASE_IMAGE
+            append MAINTAINER
+        }
         assertThat(dockerfile.instructions,
                 equalTo(["FROM ${BASE_IMAGE}".toString(), MAINTAINER]))
     }
 
     @Test
     void fallbackToDefaultMethod() {
-        def dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         dockerfile.with {
             foo('bar', 42)
             bar 'All work and no play makes Jack a dull boy'
@@ -70,14 +75,14 @@ class DockerfileTest {
 
     @Test
     void cmdWithString() {
-        def dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         dockerfile.cmd '/bin/bash'
         assertThat dockerfile.instructions, is(equalTo(['CMD /bin/bash']))
     }
 
     @Test
     void cmdWithList() {
-        def dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         dockerfile.cmd(['/bin/bash', '-i'])
         assertThat dockerfile.instructions, is(equalTo(['CMD ["/bin/bash", "-i"]']))
     }
@@ -85,7 +90,7 @@ class DockerfileTest {
     @Test
     void extendDockerfile() {
         File source = createTestDockerfile()
-        final dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         dockerfile.extendDockerfile(source)
         assertThat(dockerfile.instructions, is(equalTo(INSTRUCTIONS)))
     }
@@ -93,7 +98,7 @@ class DockerfileTest {
     @Test
     void extendDockerfileAndAppend() {
         File source = createTestDockerfile()
-        final dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         dockerfile.extendDockerfile(source)
         dockerfile.append(MAINTAINER)
         assertThat(dockerfile.instructions,
@@ -101,8 +106,8 @@ class DockerfileTest {
     }
 
     @Test
-    void addUrl() {
-        final Dockerfile dockerfile = new Dockerfile()
+    void addFromUrl() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
         final String url = 'http://foo.bar/file.tar'
 
         dockerfile.add url, '/target'
@@ -112,7 +117,7 @@ class DockerfileTest {
 
     @Test
     void addFile() {
-        final Dockerfile dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         final File file = new File('/tmp/adke')
 
         dockerfile.add file, '/target'
@@ -121,7 +126,7 @@ class DockerfileTest {
 
     @Test
     void addFileAsString() {
-        final Dockerfile dockerfile = new Dockerfile()
+        final dockerfile = new Dockerfile(new File("contextDir"))
         final String file = '/tmp/asdrisd'
 
         dockerfile.add file, '/target'

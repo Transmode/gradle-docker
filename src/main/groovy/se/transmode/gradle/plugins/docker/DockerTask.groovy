@@ -16,6 +16,7 @@
 package se.transmode.gradle.plugins.docker
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.io.Files
+import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
@@ -34,23 +35,45 @@ class DockerTask extends DockerTaskBase {
     // Whether or not to push the image into the registry (default: false)
     Boolean push
 
-    Dockerfile dockerfile
-    File externalDockerfile
-
     @Delegate(deprecated=true)
     LegacyDockerfileMethods legacyMethods
 
+    // fixme: all of this should work: dockerfile = File()/String() and dockerfile { ... } how can I achieve this?
+    private Dockerfile dockerfile
+
+    @Override
+    Task configure(Closure configureClosure) {
+        def resolveClosure = { path -> project.file(path) }
+        def copyClosure = { Closure copyClosure -> project.copy(copyClosure) }
+        this.dockerfile = new Dockerfile(stageDir, resolveClosure, copyClosure)
+        this.legacyMethods = new LegacyDockerfileMethods(dockerfile)
+        super.configure(configureClosure)
+    }
+
+    /**
+     * Configure Dockerfile with a closure, e.g.:
+     *   dockerfile {
+     *       FROM 'ubuntu'
+     *       ADD myFile
+     *   }
+     * @param closure to configure dockerfile
+     */
     public void dockerfile(Closure closure) {
         dockerfile.with(closure)
     }
 
-
     /**
-     * Path to external Dockerfile
+     * Start off with existing external Dockerfile and extend it
+     * @param Path to external Dockerfile
      */
     public void setDockerfile(String path) {
         dockerfile(project.file(path))
     }
+
+    /**
+     * Start off with existing external Dockerfile and extend it
+     * @param External Dockerfile
+     */
     public void setDockerfile(File baseFile) {
         logger.info('Creating Dockerfile from file {}.', baseFile)
         dockerfile.extendDockerfile(baseFile)
@@ -79,60 +102,9 @@ class DockerTask extends DockerTaskBase {
     def instructions
     // Dockerfile staging area i.e. context dir
     File stageDir
-    // Tasks necessary to setup the stage before building an image
-    def stageBacklog
-    
     DockerTask() {
         instructions = []
-        stageBacklog = []
-        dockerfile = new Dockerfile({ -> project.file(it) }, { -> project.copy(it) })
         stageDir = new File(project.buildDir, "docker")
-        legacyMethods = new LegacyDockerfileMethods(dockerfile)
-    }
-
-    void addFile(String source, String destination='/') {
-        addFile(project.file(source), destination)
-    }
-
-    void addFile(File source, String destination='/') {
-        def target = stageDir
-        if (source.isDirectory()) {
-            target = new File(stageDir, source.name)
-        }
-        stageBacklog.add { ->
-            project.copy {
-                from source
-                into target
-            }
-        }
-        instructions.add("ADD ${source.name} ${destination}")
-    }
-
-    void addFile(Closure copySpec) {
-        final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
-        stageBacklog.add { ->
-            createTarArchive(tarFile, copySpec)
-        }
-        instructions.add("ADD ${tarFile.name} ${'/'}")
-    }
-
-    void createTarArchive(File tarFile, Closure copySpec) {
-        final tmpDir = Files.createTempDir()
-        logger.info("Creating tar archive {} from {}", tarFile, tmpDir)
-        /* copy all files to temporary directory */
-        project.copy {
-            with {
-                into('/') {
-                    with copySpec
-                }
-            }
-            into tmpDir
-        }
-        /* create tar archive */
-        new AntBuilder().tar(
-                destfile: tarFile,
-                basedir: tmpDir
-        )
     }
     
     void contextDir(String contextDir) {
@@ -149,7 +121,7 @@ class DockerTask extends DockerTaskBase {
     protected void setupStageDir() {
         logger.info('Setting up staging directory.')
         createDirIfNotExists(stageDir)
-        stageBacklog.each() { it() }
+        dockerfile.stagingBacklog.each() { closure -> closure() }
     }
 
     @VisibleForTesting

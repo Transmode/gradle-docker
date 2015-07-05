@@ -47,7 +47,7 @@ class DockerTaskTest {
     }
 
     private Task createTask(Project project) {
-        return project.task(TASK_NAME, type: DockerTask)
+        return project.task(TASK_NAME, type: DockerTask).configure()
     }
 
     @Test
@@ -105,6 +105,7 @@ class DockerTaskTest {
                 is(equalTo(JavaBaseImage.imageFor(testVersion).imageName))
     }
 
+    // @fixme: this is an integration test!
     @Test
     public void testAddFileWithDir() {
         def project = createProject()

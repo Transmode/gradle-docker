@@ -16,7 +16,6 @@
 package se.transmode.gradle.plugins.docker.image
 
 import com.google.common.io.Files
-import org.gradle.api.file.CopySpec
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
@@ -27,42 +26,22 @@ class Dockerfile {
     private List<String> baseInstructions
     private File contextDir
     // Tasks necessary to setup the stage before building an image
-    private List stagingBacklog
+    List<Closure> stagingBacklog
 
-    // fixme: is there a better way to define default methods and make them overridable
-    private def resolvePathLamba
-    private File resolvePath(String path) {
-        return new File(path)
+    final private Closure copyCallback
+    final private Object resolvePathCallback
+
+    Dockerfile(File contextDir) {
+        this(contextDir, { String path -> new File(path) }, { -> })
     }
 
-    private def copyLambda
-    private void copy(CopySpec copySpec) {
-        // default: do nothing
-    }
-
-    // fixme: do we really need a no-args constructor?
-    Dockerfile(resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
+    Dockerfile(File contextDir, resolvePathCallback, copyCallback) {
+        this.contextDir = contextDir
+        this.resolvePathCallback = resolvePathCallback
+        this.copyCallback = copyCallback
         this.baseInstructions = []
         this.instructions = []
-        this.contextDir
         this.stagingBacklog = []
-        this.resolvePathLamba = resolvePathLambda
-        this.copyLambda = copyLambda
-    }
-
-    Dockerfile(String base,
-               resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
-        this(resolvePathLambda, copyLambda)
-        from base
-    }
-
-    Dockerfile(File externalDockerfile,
-               resolvePathLambda={ -> this.resolvePath(it)}, copyLambda={ -> this.copy(it)}) {
-        this(resolvePathLambda, copyLambda)
-        if(externalDockerfile.isFile()) {
-            this.contextDir = externalDockerfile.parentFile
-        }
-        from externalDockerfile
     }
 
     Dockerfile append(def instruction) {
@@ -125,16 +104,16 @@ class Dockerfile {
         if(isUrl(source)) {
             this.append("ADD ${source} ${destination}")
         } else if(isFile(source)) {
-            add(resolvePath(source), destination)
+            add(resolvePathCallback(source), destination)
         }
     }
 
     boolean isFile(String file) {
-        return resolvePath(file).exists()
+        return resolvePathCallback(file).exists()
     }
 
     private boolean isUrl(String url) {
-        return !resolvePath(url).exists()
+        return !resolvePathCallback(url).exists()
     }
 
     void add(File source, String destination='/') {
@@ -146,7 +125,7 @@ class Dockerfile {
             target = contextDir
         }
         stagingBacklog.add { ->
-            copy {
+            copyCallback {
                 from source
                 into target
             }
@@ -154,7 +133,7 @@ class Dockerfile {
         this.append("ADD ${source.name} ${destination}")
     }
 
-    void addFile(Closure copySpec) {
+    void add(Closure copySpec) {
         final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
         stagingBacklog.add { ->
             createTarArchive(tarFile, copySpec)
@@ -166,7 +145,7 @@ class Dockerfile {
         final tmpDir = Files.createTempDir()
         log.info("Creating tar archive {} from {}", tarFile, tmpDir)
         /* copy all files to temporary directory */
-        copy {
+        copyCallback {
             with {
                 into('/') {
                     with copySpec
