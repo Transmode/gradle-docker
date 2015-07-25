@@ -73,7 +73,8 @@ abstract class DockerTaskBase extends DefaultTask {
     private String getDefaultImageTag() {
         String tag
         if (registry) {
-            tag = "${-> registry}/${-> applicationName}"
+            def group = project.group ? "${project.group}/" : ''
+            tag = "${-> registry}/${group}${-> applicationName}"
         } else if (project.group) {
             tag = "${-> project.group}/${-> applicationName}"
         } else {

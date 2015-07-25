@@ -1,8 +1,10 @@
 # Gradle Docker plugin
 
+[![Join the chat at https://gitter.im/Transmode/gradle-docker](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Transmode/gradle-docker?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://drone.io/github.com/Transmode/gradle-docker/status.png)](https://drone.io/github.com/Transmode/gradle-docker/latest) [ ![Download](https://api.bintray.com/packages/transmode/gradle-plugins/gradle-docker/images/download.png) ](https://bintray.com/transmode/gradle-plugins/gradle-docker/_latestVersion)
 
-This plugin for [Gradle](http://www.gradle.org/) adds the capability to build und publish [Docker](http://docker.io/) images from the build script. It is available through [jCenter](https://bintray.com/transmode/gradle-plugins/gradle-docker/view) and  [MavenCentral](http://search.maven.org/#browse%7C566382288).
+This plugin for [Gradle](http://www.gradle.org/) adds the capability to build and publish [Docker](http://docker.io/) images from the build script. It is available through [jCenter](https://bintray.com/transmode/gradle-plugins/gradle-docker/view) and  [MavenCentral](http://search.maven.org/#browse%7C566382288).
 
 See the [change log](CHANGELOG.md) for information about the latest changes.
 
@@ -16,7 +18,7 @@ apply plugin: 'docker'
 
 Executing the `distDocker` task builds a docker image containing all application files (libs, scripts, etc.) created by the `distTar` task from the application plugin. If you already use the application plugin to package your project then the docker plugin will add simple docker image building to your project.
 
-By default `distDocker` uses a base image with a Java runtime according to the project's `targetCompatibility` property. The docker image entry point is set to the start script created by the application plugin. Checkout the [example](example/) project.
+By default `distDocker` uses a base image with a Java runtime according to the project's `targetCompatibility` property. The docker image entry point is set to the start script created by the application plugin. Checkout the [application example](examples/application/) project.
 
 **Note**: The creation of the convention task `distDocker` is currently only supported for JVM based application projects. If you are not using a JVM based application, use the task type `Docker` directly to create a task to build Docker images of your application.
 
@@ -84,7 +86,7 @@ Configuration properties in the plugin extension `docker` are applied to all Doc
  - `dockerBinary` - The path to the docker binary.
  - `baseImage` - The base docker image used when building images (i.e. the name after `FROM` in the Dockerfile).
  - `maintainer` - The name and email address of the image maintainer.
- - `registry` - The hostname and port of the Docker image registry unless the official Docker index is used.
+ - `registry` - The hostname and port of the Docker image registry unless the Docker Hub Registry is used.
  - `useApi` - Use the Docker Remote API instead of a locally installed `docker` binary. See [below](https://github.com/Transmode/gradle-docker/blob/master/README.md#docker-remote-api)
 
 Example to set the base docker image and maintainer name for all tasks:
@@ -146,7 +148,7 @@ For example:
 ```gradle
 docker {
     useApi true
-    hostUrl 'http://myserver:4243`
+    hostUrl 'http://myserver:4243'
     apiUsername 'user'
     apiPassword 'password'
     apiEmail 'me@mycompany.com'

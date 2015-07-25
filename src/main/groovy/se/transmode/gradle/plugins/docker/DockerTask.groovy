@@ -187,7 +187,7 @@ class DockerTask extends DockerTaskBase {
             dir.mkdirs()
         return dir
     }
-    
+
     @VisibleForTesting
     protected void setupStageDir() {
         logger.info('Setting up staging directory.')
