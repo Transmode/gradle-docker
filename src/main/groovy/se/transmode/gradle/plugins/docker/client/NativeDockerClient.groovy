@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker.client
-
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Preconditions
-
-import org.apache.commons.lang.StringUtils;
 import org.gradle.api.GradleException
 
 class NativeDockerClient implements DockerClient {
@@ -72,30 +66,31 @@ class NativeDockerClient implements DockerClient {
 
         def detachedArg = detached ? '-d' : ''
         def removeArg = autoRemove ? '--rm' : ''
-        def cmdLine = "${binary} run ${detachedArg} ${removeArg} --name ${containerName}"
+        def List<String> cmdLine = [binary, "run", detachedArg, removeArg, "--name" , containerName]
         cmdLine = appendArguments(cmdLine, env, "--env", '=')
         cmdLine = appendArguments(cmdLine, ports, "--publish")
         cmdLine = appendArguments(cmdLine, volumes, "--volume")
         cmdLine = appendArguments(cmdLine, volumesFrom, "--volumes-from")
         cmdLine = appendArguments(cmdLine, links, "--link")
-        cmdLine = "${cmdLine} ${tag}"
+        cmdLine.add(tag)
         return executeAndWait(cmdLine)
     }
 
-    private String appendArguments(String cmdLine, Map<String, String> map, String option, 
+    private static List<String> appendArguments(List<String> cmdLine, Map<String, String> map, String option,
             String separator = ':') {
         // Add each entry in the map as the indicated argument
         map.each { key, value ->
-            cmdLine = "${cmdLine} ${option} ${key}${separator}${value}"
+            cmdLine.add(option);
+            cmdLine.add("${key}${separator}${value}")
         }
         return cmdLine
     }
 
-            
-    private String appendArguments(String cmdLine, List<String> list, String option) {
+    private static List<String> appendArguments(List<String> cmdLine, List<String> list, String option) {
         // Add each entry in the map as the indicated argument
         list.each {
-            cmdLine = "${cmdLine} ${option} ${it}"
+            cmdLine.add(option);
+            cmdLine.add(it);
         }
         return cmdLine
     }
