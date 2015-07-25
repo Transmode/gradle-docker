@@ -88,7 +88,7 @@ class DockerTask extends DefaultTask {
     File stageDir
     // Tasks necessary to setup the stage before building an image
     def stageBacklog
-    
+
     // Should we use Docker's remote API instead of the docker executable
     Boolean useApi
     // URL of the remote Docker host (default: localhost)
@@ -207,7 +207,7 @@ class DockerTask extends DefaultTask {
             dir.mkdirs()
         return dir
     }
-    
+
     @VisibleForTesting
     protected void setupStageDir() {
         logger.info('Setting up staging directory.')
@@ -258,7 +258,8 @@ class DockerTask extends DefaultTask {
     private String getDefaultImageTag() {
         String tag
         if (registry) {
-            tag = "${-> registry}/${-> applicationName}"
+            def group = project.group ? "${project.group}/" : ''
+            tag = "${-> registry}/${group}${-> applicationName}"
         } else if (project.group) {
             tag = "${-> project.group}/${-> applicationName}"
         } else {
