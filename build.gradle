@@ -40,7 +40,7 @@ dependencies {
     compile 'com.google.guava:guava:17.0'
 
     compile 'com.google.guava:guava:17.0'
-    compile 'com.github.docker-java:docker-java:0.9.0'
+    compile 'com.github.docker-java:docker-java:2.1.1'
 
     testCompile 'junit:junit-dep:4.11'
     testCompile 'org.hamcrest:hamcrest-all:1.3'

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.Files
 
+import com.google.common.annotations.VisibleForTesting
+import com.google.common.io.Files
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
-
 import se.transmode.gradle.plugins.docker.client.DockerClient
 import se.transmode.gradle.plugins.docker.client.JavaDockerClient
 import se.transmode.gradle.plugins.docker.client.NativeDockerClient
@@ -46,6 +45,8 @@ class DockerTask extends DefaultTask {
     Boolean dryRun
     // Whether or not to push the image into the registry (default: false)
     Boolean push
+    // save image to the build directory
+    Boolean save
     // Hostname, port of the docker image registry unless Docker Registry Hub is used
     String registry
 
@@ -53,17 +54,20 @@ class DockerTask extends DefaultTask {
      * Path to external Dockerfile
      */
     File dockerfile
+
     public void setDockerfile(String path) {
         setDockerfile(project.file(path))
     }
+
     public void setDockerfile(File dockerfile) {
         this.dockerfile = dockerfile
     }
 
     /**
      * Name of the base docker image
-    */
+     */
     String baseImage
+
     public String getBaseImage() {
         return determineBaseImage()
     }
@@ -88,7 +92,7 @@ class DockerTask extends DefaultTask {
     File stageDir
     // Tasks necessary to setup the stage before building an image
     def stageBacklog
-    
+
     // Should we use Docker's remote API instead of the docker executable
     Boolean useApi
     // URL of the remote Docker host (default: localhost)
@@ -105,11 +109,11 @@ class DockerTask extends DefaultTask {
         stageDir = new File(project.buildDir, "docker")
     }
 
-    void addFile(String source, String destination='/') {
+    void addFile(String source, String destination = '/') {
         addFile(project.file(source), destination)
     }
 
-    void addFile(File source, String destination='/') {
+    void addFile(File source, String destination = '/') {
         def target = stageDir
         if (source.isDirectory()) {
             target = new File(stageDir, source.name)
@@ -124,7 +128,7 @@ class DockerTask extends DefaultTask {
     }
 
     void addFile(Closure copySpec) {
-        final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
+        final tarFile = new File(stageDir, "add_${instructions.size() + 1}.tar")
         stageBacklog.add { ->
             createTarArchive(tarFile, copySpec)
         }
@@ -207,7 +211,7 @@ class DockerTask extends DefaultTask {
             dir.mkdirs()
         return dir
     }
-    
+
     @VisibleForTesting
     protected void setupStageDir() {
         logger.info('Setting up staging directory.')
@@ -245,8 +249,18 @@ class DockerTask extends DefaultTask {
             if (push) {
                 println client.pushImage(tag)
             }
+            if (save) {
+                def file = getImageFile()
+                logger.info("Save image to " + file.getAbsolutePath())
+                client.saveImage(tag, file)
+            }
+
         }
 
+    }
+
+    File getImageFile() {
+        new File(project.getBuildDir(), "${applicationName}-${project.version}.tar")
     }
 
     private String getImageTag() {
@@ -269,7 +283,7 @@ class DockerTask extends DefaultTask {
 
     private String appendImageTagVersion(String tag) {
         def version = tagVersion ?: project.version
-        if(version == 'unspecified') {
+        if (version == 'unspecified') {
             version = 'latest'
         }
         return "${tag}:${version}"
@@ -278,7 +292,7 @@ class DockerTask extends DefaultTask {
 
     private DockerClient getClient() {
         DockerClient client
-        if(getUseApi()) {
+        if (getUseApi()) {
             logger.info("Using the Docker remote API.")
             client = JavaDockerClient.create(
                     getHostUrl(),
