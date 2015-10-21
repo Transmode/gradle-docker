@@ -8,7 +8,7 @@ buildscript {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
+    gradleVersion = '2.4'
 }
 
 group = 'org.acme'
@@ -17,7 +17,7 @@ docker {
     maintainer = 'Victor Vieux <victor@docker.com>'
 }
 
-task nginxDocker(type: Docker) {
+task docker(type: Docker) {
     // The default image tag contains the applicationName
     applicationName = 'nginx'
 
@@ -29,10 +29,13 @@ task nginxDocker(type: Docker) {
     /* addFile accepts copySpec closure (like project.copy)
        The source files are added to a tar archive which is then copied
        into the image using the Dockerfile 'ADD' instruction. */
-    addFile {
-        from 'input'
-        into 'docs'
-    }
+
+    // @fixme: broken right now
+//    addFile {
+//        from 'input'
+//        into 'docs'
+//    }
+
     defaultCommand(["/bin/bash"])
 
     dryRun = true

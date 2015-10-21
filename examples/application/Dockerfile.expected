@@ -1,0 +1,4 @@
+FROM dockerfile/java
+EXPOSE 8080
+ADD docker-jetty-1.0.tar /
+ENTRYPOINT ["/docker-jetty-1.0/bin/docker-jetty"]
