@@ -45,37 +45,48 @@ docker {
     maintainer 'Guillaume J. Charmes "guillaume@dotcloud.com"'
 }
 
-task nginxDocker(type: Docker) {
-    applicationName = "nginx"
-    runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
-    runCommand "apt-get update"
-    runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
+task docker(type: Docker) {
+  applicationName = 'nginx'
+  dockerfile {
+      run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
+      run 'apt-get update'
+      run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
+  }
 }
 ```
 
 ## Building your Dockerfile
-In the example above the instructions on how to build the nginx Docker image are configured **inline** using methods of the Docker Gradle task. During task execution the plugin first creates a [Dockerfile](https://docs.docker.com/reference/builder/) which it then passes to Docker to build the image.
 
-The available instructions are:
+### Inline
+In the example above the instructions on how to build the nginx Docker image are configured **inline** in a `dockerfile {...}` block. During task execution a Dockerfile is created according to the supplied instructions. The generated Dockerfile is then used to build the image. All valid Dockerfile syntax is supported by the plugin. However instructions have to be kept lowercase (i.e. `run` instead of `RUN`) and keep in mind to quote (`'single'` or `"double"`) the arguments of the instructions.
 
-| Dockerfile instruction | Gradle task method |
-| -----------------------|--------------------|
-| `ADD`                  | `addFile(Closure copySpec)`
-|                        | `addFile(String source, String dest)`
-|                        | `addFile(File source, String dest)`
-| `CMD`                  | `defaultCommand(List cmd)`
-| `ENTRYPOINT`           | `entryPoint(List entryPoint)`
-| `ENV`                  | `setEnvironment(String key, String val)`
-| `EXPOSE`               | `exposePort(Integer port)`
-|                        | `exposePort(String port)`
-| `RUN`                  | `runCommand(String cmd)`
-| `USER`                 | `switchUser(String userNameOrUid)`
-| `VOLUME`               | `volume(String... paths)`
-| `WORKDIR`              | `workingDir(String dir)`
+Some instructions come with built-in superpowers and are more powerful than their vanilla Dockerfile instruction counterparts:
 
-Instead of defining the build instructions inline in the task it is also possible to supply an **external Dockerfile**. If the task property `dockerfile` is set to the path of an existing Dockerfile the plugin will use this file instead to build the image.
+- `add`
 
-You can even combine these two methods: Supplying an external Dockerfile and extending it by defining instructions in the task. The build instructions from the external Dockerfile are read first and the instructions defined in the task appended. If an external Dockerfile is supplied, the `baseImage` property is ignored.
+  Besides accepting the path of the file to be copied to the image, this method also accepts an instance of `File` or a Gradle [`copySpec`](https://docs.gradle.org/current/javadoc/org/gradle/api/file/CopySpec.html). Example:
+
+  ```java
+  add {
+      from 'src/main/webapp'
+      into '/httproot'
+      include '**/*.html'
+      include '**/*.jsp'
+      exclude { details -> details.file.name.endsWith('.html') &&
+                           details.file.text.contains('staging') }
+ }
+  ```
+
+Refer to the official [Dockerfile](https://docs.docker.com/reference/builder/) documentation for more information on Dockerfile instructions and syntax.
+
+*Note: The task methods `addFile(...)`, `entryPoint(...)`, `runCommand(...)`, etc. from plugin versions below 1.3 have been deprecated. They are still functional but will be removed in future version of this plugin.*
+
+### External
+Instead of defining the build instructions inline in the task it is possible to supply an **external Dockerfile**. If the task property `dockerfile` is set to the path of an existing Dockerfile the plugin will use this file instead to build the image.
+
+If an external Dockerfile is supplied, the `baseImage` property is ignored.
+
+You can also combine these two methods: Supplying an external Dockerfile and extending it by defining instructions in the task. The build instructions from the external Dockerfile are read first and the instructions defined in the task appended. A typical use case is to supply a boiler-plate template Dockerfile as an external file and extend it in the Gradle task.
 
 ## Configuring the plugin
 The plugin exposes configuration options on 2 levels: globally through a plugin extension and on a per task basis. The plugin tries to always set sensible defaults for all properties.

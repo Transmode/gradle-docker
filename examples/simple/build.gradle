@@ -21,10 +21,11 @@ task docker(type: Docker) {
     // The default image tag contains the applicationName
     applicationName = 'nginx'
 
-    // Dockerfile instruction 'RUN'
-    runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
-    runCommand "apt-get update"
-    runCommand "apt-get install -y inotify-tools nginx apache2 openssh-server"
+    dockerfile {
+        run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
+        run 'apt-get update'
+        run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
+    }
 
     /* addFile accepts copySpec closure (like project.copy)
        The source files are added to a tar archive which is then copied
@@ -35,8 +36,6 @@ task docker(type: Docker) {
 //        from 'input'
 //        into 'docs'
 //    }
-
-    defaultCommand(["/bin/bash"])
 
     dryRun = true
 }
