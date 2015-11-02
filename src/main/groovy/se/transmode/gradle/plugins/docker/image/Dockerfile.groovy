@@ -68,9 +68,17 @@ class Dockerfile {
      * Example: foo('bar', 42) becomes "FOO bar 42"
      */
     def methodMissing(String name, args) {
-        // fixme: check for case insensitive method name match before falling back to default method
+        // fixme: uppercase methods don't seem to work without parentheses (e.g. "RUN 'echo'")
+        if (name.toLowerCase() != name) {
+            return callWithLowerCaseName(name, args)
+        }
         log.debug('No explicit method declaration for "{}({})" found. Using default implementation.', name, args.join(', '))
         this.append("${name.toUpperCase()} ${args.join(' ')}")
+    }
+
+    def callWithLowerCaseName(String name, args) {
+        name = name.toLowerCase()
+        return this."$name"(*args)
     }
 
     // todo: consider removing "extendDockerfile" as method and add it as a parameter to dockerfile DockerTask.dockerfile as it is not a real Dockerfile instruction
