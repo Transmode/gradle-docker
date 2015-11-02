@@ -116,7 +116,7 @@ class Dockerfile {
         }
     }
 
-    boolean isFile(String file) {
+    private boolean isFile(String file) {
         return resolvePathCallback(file).exists()
     }
 
@@ -149,7 +149,7 @@ class Dockerfile {
         instructions.add("ADD ${tarFile.name} ${'/'}")
     }
 
-    void createTarArchive(File tarFile, Closure copySpec) {
+    private void createTarArchive(File tarFile, Closure copySpec) {
         final tmpDir = Files.createTempDir()
         log.info("Creating tar archive {} from {}", tarFile, tmpDir)
         /* copy all files to temporary directory */
