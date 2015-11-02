@@ -50,12 +50,14 @@ class DockerPlugin implements Plugin<Project> {
 
             inputs.files project.distTar
 
+            def installDir = "/" + project.distTar.archiveName - ".${project.distTar.extension}"
+
             doFirst {
                 applicationName = project.applicationName
-                addFile project.distTar.outputs.files.singleFile
-
-                def installDir = "/" + project.distTar.archiveName - ".${project.distTar.extension}"
-                entryPoint = ["$installDir/bin/${project.applicationName}"]
+                dockerfile {
+                    add(project.distTar.outputs.files.singleFile.name)
+                    entryPoint(["$installDir/bin/${project.applicationName}"])
+                }
             }
         }
     }
