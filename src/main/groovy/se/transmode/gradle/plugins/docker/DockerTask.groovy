@@ -162,8 +162,8 @@ class DockerTask extends DefaultTask {
         instructions.add("RUN ${command}")
     }
 
-    void exposePort(Integer port) {
-        instructions.add("EXPOSE ${port}")
+    void exposePort(Integer... ports) {
+        instructions.add('EXPOSE ' + ports.join(' ').trim())
     }
 
     void setEnvironment(String key, String value) {

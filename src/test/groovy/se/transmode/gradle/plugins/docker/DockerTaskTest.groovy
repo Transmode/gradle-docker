@@ -65,6 +65,13 @@ class DockerTaskTest {
     }
 
     @Test
+    public void defineExposePorts() {
+        def task = createTask(createProject())
+        task.exposePort(99, 100, 101)
+        assertThat "EXPOSE ${99} ${100} ${101}".toString(), isIn(task.buildDockerfile().instructions)
+    }
+
+    @Test
     public void nonJavaDefaultBaseImage() {
         def project = createProject()
         def task = createTask(project)
