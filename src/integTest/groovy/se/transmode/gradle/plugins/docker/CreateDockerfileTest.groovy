@@ -43,7 +43,7 @@ class CreateDockerfileTest {
 
         task.runCommand 'apt-get install -y inotify-tools nginx apache2 openssh-server'
 
-        task.addInstruction "copy", "/tmp/file1"
+        task.addInstruction "COPY", "tmp/file1"
 
         task.volume "/home/docker", "/tmp"
 
@@ -73,7 +73,7 @@ class CreateDockerfileTest {
             run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
             run 'apt-get update'
             run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
-            copy "/tmp/file1"
+            copy "tmp/file1"
             volume "/home/docker", "/tmp"
             cmd(['/bin/bash'])
         }

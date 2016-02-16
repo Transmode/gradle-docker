@@ -150,6 +150,35 @@ class Dockerfile {
         instructions.add("ADD ${tarFile.name} ${'/'}")
     }
 
+    void copy(String source, String destination='/') {
+        copy(resolvePathCallback(source), destination)
+    }
+
+    void copy(File source, String destination='/') {
+        File target
+        if (source.isDirectory()) {
+            target = new File(contextDir, source.name)
+        }
+        else {
+            target = contextDir
+        }
+        stagingBacklog.add { ->
+            copyCallback {
+                from source
+                into target
+            }
+        }
+        this.append("COPY ${source.name} ${destination}")
+    }
+
+    void copy(Closure copySpec) {
+        final tarFile = new File(contextDir, "copy_${instructions.size()+1}.tar")
+        stagingBacklog.add { ->
+            createTarArchive(tarFile, copySpec)
+        }
+        instructions.add("COPY ${tarFile.name} ${'/'}")
+    }
+
     private void createTarArchive(File tarFile, Closure copySpec) {
         final tmpDir = Files.createTempDir()
         log.info("Creating tar archive {} from {}", tarFile, tmpDir)

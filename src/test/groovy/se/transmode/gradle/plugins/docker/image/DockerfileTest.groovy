@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker.image
+
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -125,12 +126,63 @@ class DockerfileTest {
     }
 
     @Test
+    void addDirectory() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        final File file = new File('gradle/wrapper')
+
+        dockerfile.add file, '/gradle'
+        assertThat dockerfile.instructions, is(equalTo(['ADD wrapper /gradle']))
+    }
+
+    @Test
     void addFileAsString() {
         final dockerfile = new Dockerfile(new File("contextDir"))
-        final String file = '/tmp/asdrisd'
+        final String file = 'gradle/wrapper/gradle-wrapper.properties'
 
         dockerfile.add file, '/target'
-        assertThat dockerfile.instructions, is(equalTo(["ADD ${file} /target".toString()]))
+        assertThat dockerfile.instructions, is(equalTo(['ADD gradle-wrapper.properties /target']))
+    }
+
+    @Test
+    void addWithCopySpec() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+
+        dockerfile.add {
+            from('src/foo')
+            into('dest/bar')
+            exclude '*~'
+        }
+        assertThat dockerfile.instructions, is(equalTo(['ADD add_1.tar /']))
+    }
+
+    @Test
+    void copyFile() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        final File file = new File('tmp/wetoy')
+
+        dockerfile.copy file, '/foo'
+        assertThat dockerfile.instructions, is(equalTo(['COPY wetoy /foo']))
+    }
+
+    @Test
+    void copyFileAsString() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        final String path = 'asdrlu/foo'
+
+        dockerfile.copy path, '/bar'
+        assertThat dockerfile.instructions, is(equalTo(['COPY foo /bar']))
+    }
+
+    @Test
+    void copyWithCopySpec() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+
+        dockerfile.copy {
+            from('src/foo')
+            into('dest/bar')
+            exclude '*~'
+        }
+        assertThat dockerfile.instructions, is(equalTo(['COPY copy_1.tar /']))
     }
 
     @Test
