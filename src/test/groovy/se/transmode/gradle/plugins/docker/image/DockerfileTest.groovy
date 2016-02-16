@@ -196,4 +196,31 @@ class DockerfileTest {
                 equalTo(['CMD /bin/bash',
                          'ENV FOO=bar']))
     }
+
+    @Test
+    void exposePort() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.with {
+            expose 8080
+        }
+        assertThat(dockerfile.instructions, equalTo(['EXPOSE 8080']))
+    }
+
+    @Test
+    void exposeMultiplePort() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.with {
+            expose 8080, 8081, 9090
+        }
+        assertThat(dockerfile.instructions, equalTo(['EXPOSE 8080 8081 9090']))
+    }
+
+    @Test
+    void exposeUdpPort() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.with {
+            expose '162/udp'
+        }
+        assertThat(dockerfile.instructions, equalTo(['EXPOSE 162/udp']))
+    }
  }

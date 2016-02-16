@@ -58,17 +58,26 @@ class DockerTaskTest {
     }
 
     @Test
-    public void defineExposePort() {
+    public void testExposePort() {
         def task = createTask(createProject())
         task.exposePort(99)
-        assertThat "EXPOSE ${99}".toString(), isIn(task.buildDockerfile().instructions)
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 99')
+
     }
 
     @Test
-    public void defineExposePortUdp() {
+    public void testExposeMultiplePorts() {
+        def task = createTask(createProject())
+        task.exposePort(99, 100, 101)
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 99 100 101')
+
+    }
+
+    @Test
+    public void testExposePortUdp() {
         def task = createTask(createProject())
         task.exposePort("162/udp")
-        assertThat "EXPOSE 162/udp".toString(), isIn(task.buildDockerfile().instructions)
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 162/udp')
     }
 
     @Test

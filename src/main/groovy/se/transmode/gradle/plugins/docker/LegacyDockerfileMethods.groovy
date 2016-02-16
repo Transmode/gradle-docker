@@ -80,8 +80,8 @@ class LegacyDockerfileMethods implements GroovyInterceptable {
      * This method is deprecated. Use the new Dockerfile DSL instead:
      */
     @Deprecated
-    void exposePort(Integer port) {
-        dockerfile.expose(port)
+    void exposePort(Integer... ports) {
+        dockerfile.expose(*ports)
     }
 
     @Deprecated
