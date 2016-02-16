@@ -21,9 +21,9 @@ import org.gradle.api.JavaVersion;
  * @author Matthias Grüter, matthias.gruter@transmode.com
  */
 public enum JavaBaseImage {
-    JAVA6("java:openjdk-6-jre", JavaVersion.VERSION_1_6),
-    JAVA7("java:openjdk-7-jre", JavaVersion.VERSION_1_7),
-    JAVA8("java:openjdk-8-jre", JavaVersion.VERSION_1_8);
+    JAVA6("java:6-jre", JavaVersion.VERSION_1_6),
+    JAVA7("java:7-jre", JavaVersion.VERSION_1_7),
+    JAVA8("java:8-jre", JavaVersion.VERSION_1_8);
 
     final String imageName;
     final JavaVersion target;
