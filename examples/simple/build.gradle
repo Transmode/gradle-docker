@@ -14,7 +14,8 @@ task wrapper(type: Wrapper) {
 group = 'org.acme'
 
 docker {
-    maintainer = 'Victor Vieux <victor@docker.com>'
+    baseImage = 'debian:jessie'
+    maintainer = 'John Doe <john@doe.com>'
 }
 
 task docker(type: Docker) {
@@ -24,18 +25,15 @@ task docker(type: Docker) {
     dockerfile {
         run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
         run 'apt-get update'
-        run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
+        run 'apt-get install -y nginx'
+
+        /* The 'add' instruction accepts a Gradle copySpec closure
+            The source files are added to a temporary tar archive which
+            is then added to the image using the Dockerfile 'ADD' instruction. */
+        add {
+            from 'input'
+            into 'docs'
+        }
     }
-
-    /* addFile accepts copySpec closure (like project.copy)
-       The source files are added to a tar archive which is then copied
-       into the image using the Dockerfile 'ADD' instruction. */
-
-    // @fixme: broken right now
-//    addFile {
-//        from 'input'
-//        into 'docs'
-//    }
-
     dryRun = true
 }

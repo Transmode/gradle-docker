@@ -25,7 +25,7 @@ class Dockerfile {
     private List<String> instructions
     private List<String> baseInstructions
     private File contextDir
-    // Tasks necessary to setup the stage before building an image
+    // Actions needed to setup the build stage before building an image
     List<Closure> stagingBacklog
 
     final private Closure copyCallback
@@ -109,20 +109,20 @@ class Dockerfile {
         this.append('ENTRYPOINT ["' + cmd.join('", "') + '"]')
     }
 
-    void add(String source, String destination='/') {
-        if(isUrl(source)) {
-            this.append("ADD ${source} ${destination}")
-        } else if(isFile(source)) {
-            add(resolvePathCallback(source), destination)
-        }
-    }
-
     private boolean isFile(String file) {
         return resolvePathCallback(file).exists()
     }
 
     private boolean isUrl(String url) {
         return !resolvePathCallback(url).exists()
+    }
+
+    void add(String source, String destination='/') {
+        if(isUrl(source)) {
+            this.append("ADD ${source} ${destination}")
+        } else if(isFile(source)) {
+            add(resolvePathCallback(source), destination)
+        }
     }
 
     void add(File source, String destination='/') {
@@ -143,7 +143,7 @@ class Dockerfile {
     }
 
     void add(Closure copySpec) {
-        final tarFile = new File(stageDir, "add_${instructions.size()+1}.tar")
+        final tarFile = new File(contextDir, "add_${instructions.size()+1}.tar")
         stagingBacklog.add { ->
             createTarArchive(tarFile, copySpec)
         }
