@@ -132,4 +132,16 @@ class DockerfileTest {
         dockerfile.add file, '/target'
         assertThat dockerfile.instructions, is(equalTo(["ADD ${file} /target".toString()]))
     }
+
+    @Test
+    void instructionsAreCaseInsesitive() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        dockerfile.with {
+            CMD('/bin/bash')
+        }
+        dockerfile.ENV('FOO=bar')
+        assertThat(dockerfile.instructions,
+                equalTo(['CMD /bin/bash',
+                         'ENV FOO=bar']))
+    }
  }

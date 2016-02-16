@@ -69,6 +69,7 @@ class Dockerfile {
      */
     def methodMissing(String name, args) {
         // fixme: uppercase methods don't seem to work without parentheses (e.g. "RUN 'echo'")
+        //        see discussion on the Groovy User list: http://groovy.329449.n5.nabble.com/Optional-parentheses-for-methods-with-all-uppercase-name-tp5731174.html
         if (name.toLowerCase() != name) {
             return callWithLowerCaseName(name, args)
         }
