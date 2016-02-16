@@ -47,7 +47,7 @@ class DockerTaskTest {
     }
 
     private Task createTask(Project project) {
-        return project.task(TASK_NAME, type: DockerTask)
+        return project.task(TASK_NAME, type: DockerTask).configure()
     }
 
     @Test
@@ -58,10 +58,26 @@ class DockerTaskTest {
     }
 
     @Test
-    public void defineExposePort() {
+    public void testExposePort() {
         def task = createTask(createProject())
         task.exposePort(99)
-        assertThat "EXPOSE ${99}".toString(), isIn(task.buildDockerfile().instructions)
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 99')
+
+    }
+
+    @Test
+    public void testExposeMultiplePorts() {
+        def task = createTask(createProject())
+        task.exposePort(99, 100, 101)
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 99 100 101')
+
+    }
+
+    @Test
+    public void testExposePortUdp() {
+        def task = createTask(createProject())
+        task.exposePort("162/udp")
+        assertThat task.buildDockerfile().instructions[1], equalTo('EXPOSE 162/udp')
     }
 
     @Test
@@ -98,6 +114,7 @@ class DockerTaskTest {
                 is(equalTo(JavaBaseImage.imageFor(testVersion).imageName))
     }
 
+    // @fixme: this is an integration test!
     @Test
     public void testAddFileWithDir() {
         def project = createProject()
@@ -114,9 +131,9 @@ class DockerTaskTest {
         
         // Confirm that the directory was copied under the staging dir
         File targetDir = new File(task.stageDir, TEST_TARGET_DIR)
-        assertThat(targetDir.exists(), equalTo(true))
-        assertThat(targetDir.isDirectory(), equalTo(true))
-        assertThat(targetDir.list().length, equalTo(dir.list().length))
+        assertThat(targetDir.exists(), is(true))
+        assertThat(targetDir.isDirectory(), is(true))
+        assertThat(targetDir.list().length, is(equalTo(dir.list().length)))
     }
 
     @Test
@@ -124,17 +141,27 @@ class DockerTaskTest {
         def project = createProject()
         def task = createTask(project)
         // write base dockerfile to file
-        def dockerfile = testFolder.newFile('Dockerfile')
-        dockerfile.withWriter { out ->
+        def externalDockerfile = testFolder.newFile('Dockerfile')
+        externalDockerfile.withWriter { out ->
             TEST_INSTRUCTIONS.each { out.writeLine(it) }
         }
-        task.dockerfile = dockerfile
+        task.setDockerfile externalDockerfile
         // add instructions to dockerfile
         task.maintainer = TEST_MAINTAINER
         task.setEnvironment(*TEST_ENV)
-        assertThat(task.buildDockerfile().instructions,
+
+        def actual = task.buildDockerfile().instructions
+        assertThat(actual,
                 contains(*TEST_INSTRUCTIONS,
-                        "MAINTAINER ${TEST_MAINTAINER}".toString(),
-                        "ENV ${TEST_ENV.join(' ')}".toString()))
+                        "ENV ${TEST_ENV.join(' ')}".toString(),
+                        "MAINTAINER ${TEST_MAINTAINER}".toString()))
     }
+
+    @Test
+    public void switchUser() {
+        def task = createTask(createProject())
+        task.switchUser('junit')
+        assertThat "USER junit".toString(), isIn(task.buildDockerfile().instructions)
+    }
+
 }

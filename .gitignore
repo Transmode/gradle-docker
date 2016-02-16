@@ -1,11 +1,15 @@
 .gradle/
-.idea/
 build/
+
+.idea/*
+!.idea/runConfigurations/
 gradle-docker.iml
 gradle-docker.ipr
 gradle-docker.iws
 out
+
 *~
+
 .classpath
 .project
 .settings/

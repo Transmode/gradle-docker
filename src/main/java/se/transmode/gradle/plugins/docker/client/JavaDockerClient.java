@@ -15,14 +15,25 @@
  */
 package se.transmode.gradle.plugins.docker.client;
 
-import com.google.common.base.Preconditions;
-import com.sun.jersey.api.client.ClientResponse;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.lang.StringUtils;
 import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.io.File;
+import com.github.dockerjava.client.NotFoundException;
+import com.github.dockerjava.client.command.CreateContainerCmd;
+import com.github.dockerjava.client.command.StartContainerCmd;
+import com.github.dockerjava.client.model.Bind;
+import com.github.dockerjava.client.model.ContainerCreateResponse;
+import com.github.dockerjava.client.model.Link;
+import com.github.dockerjava.client.model.Volume;
+import com.google.common.base.Preconditions;
+import com.sun.jersey.api.client.ClientResponse;
 
 public class JavaDockerClient extends com.github.dockerjava.client.DockerClient implements DockerClient {
 
@@ -77,5 +88,87 @@ public class JavaDockerClient extends com.github.dockerjava.client.DockerClient 
         }
 
         return client;
+    }
+
+    @Override
+    public String run(String tag, String containerName, boolean detached, boolean autoRemove,
+            Map<String, String> env, Map<String, String> ports, Map<String, String> volumes, 
+            List<String> volumesFrom, List<String> links) {
+        
+        Preconditions.checkArgument(!StringUtils.isEmpty(tag),  
+                "Image tag cannot be empty or null.");
+        Preconditions.checkArgument(env != null,  "Environment map cannot be null.");
+        Preconditions.checkArgument(ports != null,  "Exported port map cannot be null.");
+        Preconditions.checkArgument(volumes != null,  "Volume map cannot be null.");
+        Preconditions.checkArgument(volumesFrom != null,  "Volumes from list cannot be null.");
+        Preconditions.checkArgument(links != null,  "Link list cannot be null.");
+        Preconditions.checkArgument(!detached || !autoRemove, 
+                "Cannot set both detached and autoRemove options to true.");
+        
+        // Start by creating the container
+        CreateContainerCmd createCmd = createContainerCmd(tag).withName(containerName);
+        String[] envList = new String[env.size()];
+        int index = 0;
+        for (Entry<String, String> entry : env.entrySet()) {
+            String envSetting = String.format("%s=%s", entry.getKey(), entry.getValue());
+            envList[index++] = envSetting;
+        }
+        createCmd.withEnv(envList);
+        ContainerCreateResponse createResponse;
+        try {
+            createResponse = createContainerCmd(tag).exec();
+        } catch (NotFoundException nfe) {
+            // TODO have option to pull image
+            throw nfe;
+        }
+        String containerId = createResponse.getId();
+        
+        // Configure start command
+        StartContainerCmd startCmd = startContainerCmd(containerId);
+        Bind[] binds = new Bind[volumes.size()];
+        index = 0;
+        for (Entry<String, String> entry : volumes.entrySet()) {
+            Volume vol = new Volume(entry.getValue());
+            Bind bind = new Bind(entry.getKey(), vol);
+            binds[index++] = bind;
+        }
+        startCmd.withBinds(binds);
+        startCmd.withVolumesFrom(StringUtils.join(volumesFrom, ","));
+        Link[] linkArr = new Link[links.size()];
+        index = 0;
+        for (String linkStr : links) {
+            String[] values = linkStr.split(":");
+            Link link = new Link(values[0], values.length == 2 ? values[1] : values[0]);
+            linkArr[index++] = link;
+        }
+        startCmd.withLinks(linkArr);
+        
+        // Start the container
+        try {
+            startCmd.exec();
+        } catch (Exception e) {
+            // Want to get rid of container we created
+            removeContainerCmd(containerId).exec();
+        }
+       
+        // Should we wait around and/or remove the container on exit
+        if (autoRemove) {
+            return removeOnExit(containerId);
+        } else if (detached) {
+            return containerId;
+        } else {
+            return waitForExit(containerId);
+        }
+    }
+    
+    private String removeOnExit(String containerId) {
+        String exitStatus = waitForExit(containerId);
+        removeContainerCmd(containerId).exec();
+        return exitStatus;
+    }
+
+    private String waitForExit(String containerId) {
+        // TODO -- show container output if/when we get that option from docker-java
+        return "Exit status: " + waitContainerCmd(containerId).exec();
     }
 }

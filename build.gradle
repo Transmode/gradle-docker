@@ -13,7 +13,7 @@ apply from: file('gradle/idea.gradle')
 apply from: file('gradle/publish.gradle')
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
+    gradleVersion = '2.4'
 }
 
 sourceSets {
@@ -37,13 +37,13 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.google.guava:guava:17.0'
 
     compile 'com.google.guava:guava:17.0'
-    compile 'com.github.docker-java:docker-java:0.9.0'
+    compile 'com.github.docker-java:docker-java:0.9.1'
 
     testCompile 'junit:junit-dep:4.11'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
+    testCompile 'org.mockito:mockito-core:1.9.5'
 }
 
 task integTest(type: Test) {
@@ -52,6 +52,8 @@ task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
 
+    reports.html.destination = file("${reporting.baseDir}/integTests")
+    reports.junitXml.destination = file("$buildDir/integTest-results")
 }
 
 // run integration tests after unit tests if both are scheduled for execution
@@ -68,6 +70,14 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
 }
+
+/* Workaround for JDK bug (https://bugs.openjdk.java.net/browse/JDK-8051012)
+   regression bug in 7u65, fixed in 7u80 and 8u40
+ */
+compileTestGroovy.groovyOptions.forkOptions.jvmArgs = ['-noverify']
+test.jvmArgs '-noverify'
+integTest.jvmArgs '-noverify'
+
 
 artifacts {
     archives jar
