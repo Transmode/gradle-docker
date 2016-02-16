@@ -55,8 +55,8 @@ class DockerPlugin implements Plugin<Project> {
             doFirst {
                 applicationName = project.applicationName
                 dockerfile {
-                    add(project.distTar.outputs.files.singleFile.name)
-                    entryPoint(["$installDir/bin/${project.applicationName}"])
+                    ADD(project.distTar.outputs.files.singleFile)
+                    ENTRYPOINT(["$installDir/bin/${project.applicationName}"])
                 }
             }
         }
