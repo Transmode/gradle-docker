@@ -107,7 +107,16 @@ class DockerfileTest {
     }
 
     @Test
-    void addFromUrl() {
+    void addURL() {
+        final dockerfile = new Dockerfile(new File("contextDir"))
+        final URL url = new URL('http', 'localhost', 8080, '/download/myapp.tar')
+
+        dockerfile.add url
+        assertThat dockerfile.instructions, is(equalTo(["ADD ${url.toString()} /".toString()]))
+    }
+
+    @Test
+    void addURLasString() {
         final dockerfile = new Dockerfile(new File("contextDir"))
         final String url = 'http://foo.bar/file.tar'
 

@@ -141,6 +141,14 @@ class LegacyDockerfileMethods implements GroovyInterceptable {
      * This method is deprecated. Use the new Dockerfile DSL instead:
      */
     @Deprecated
+    void addFile(URL source, String destination='/') {
+        dockerfile.add(source, destination)
+    }
+
+    /**
+     * This method is deprecated. Use the new Dockerfile DSL instead:
+     */
+    @Deprecated
     void addFile(Closure copySpec) {
         dockerfile.add(copySpec)
     }

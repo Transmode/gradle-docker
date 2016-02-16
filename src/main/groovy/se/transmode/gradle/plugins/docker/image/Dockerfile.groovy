@@ -109,18 +109,23 @@ class Dockerfile {
         this.append('ENTRYPOINT ["' + cmd.join('", "') + '"]')
     }
 
-    private boolean isFile(String file) {
-        return resolvePathCallback(file).exists()
+    private static boolean isUrl(String url) {
+        try {
+            new URL(url)
+        } catch (MalformedURLException e) {
+            return false
+        }
+        return true;
     }
 
-    private boolean isUrl(String url) {
-        return !resolvePathCallback(url).exists()
+    void add(URL source, String destination='/') {
+        this.append("ADD ${source.toString()} ${destination}")
     }
 
     void add(String source, String destination='/') {
         if(isUrl(source)) {
             this.append("ADD ${source} ${destination}")
-        } else if(isFile(source)) {
+        } else {
             add(resolvePathCallback(source), destination)
         }
     }
