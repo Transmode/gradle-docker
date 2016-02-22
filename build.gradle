@@ -39,7 +39,7 @@ dependencies {
     compile localGroovy()
 
     compile 'com.google.guava:guava:17.0'
-    compile 'com.github.docker-java:docker-java:0.9.1'
+    compile 'com.github.docker-java:docker-java:2.2.0'
 
     testCompile 'junit:junit-dep:4.11'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
