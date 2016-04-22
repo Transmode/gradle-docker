@@ -1,0 +1,2 @@
+// Docker needs this to be all-lowercase 
+rootProject.name = "docker-spark"
