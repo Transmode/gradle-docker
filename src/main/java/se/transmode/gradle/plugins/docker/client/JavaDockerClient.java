@@ -59,11 +59,11 @@ public class JavaDockerClient implements DockerClient {
     }
 
     @Override
-    public String buildImage(File buildDir, String tag) {
+    public String buildImage(File buildDir, String tag, boolean pull) {
         Preconditions.checkNotNull(tag, "Image tag can not be null.");
         Preconditions.checkArgument(!tag.isEmpty(), "Image tag can not be empty.");
         final BuildImageResultCallback resultCallback = new BuildImageResultCallback();
-        dockerClient.buildImageCmd(buildDir).withTag(tag).exec(resultCallback);
+        dockerClient.buildImageCmd(buildDir).withTag(tag).withPull(pull).exec(resultCallback);
         return resultCallback.awaitImageId();
     }
 

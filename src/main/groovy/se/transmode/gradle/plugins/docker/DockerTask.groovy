@@ -34,6 +34,8 @@ class DockerTask extends DockerTaskBase {
     Boolean dryRun
     // Whether or not to push the image into the registry (default: false)
     Boolean push
+    // Wether or not the plugin will use pull flag when building
+    boolean pull
 
     @Delegate(deprecated=true)
     LegacyDockerfileMethods legacyMethods
@@ -147,7 +149,7 @@ class DockerTask extends DockerTaskBase {
 
         if (!dryRun) {
             DockerClient client = getClient()
-            println client.buildImage(stageDir, tag)
+            println client.buildImage(stageDir, tag, pull)
             if (push) {
                 println client.pushImage(tag)
             }

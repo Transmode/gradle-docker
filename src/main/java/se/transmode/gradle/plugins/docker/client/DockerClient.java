@@ -27,7 +27,7 @@ public interface DockerClient {
      * @param tag the tag to apply to the image
      * @return the output of the command
      */
-    public String buildImage(File buildDir, String tag);
+    public String buildImage(File buildDir, String tag, boolean pull);
     
     /**
      * Push the given image to the configured Docker registry.
