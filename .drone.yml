@@ -1,9 +1,7 @@
 image: openjdk7
 script:
   - ./gradlew assemble
-  - ./gradlew check -x integTest
-  - ./gradlew publishToMavenLocal  # this is needed for testing the example projects
-  - ./gradlew integTest
+  - ./gradlew check
 notify:
   email:
     recipients:

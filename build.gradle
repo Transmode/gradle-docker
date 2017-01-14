@@ -58,6 +58,7 @@ task integTest(type: Test) {
 
 // run integration tests after unit tests if both are scheduled for execution
 integTest.mustRunAfter test
+integTest.dependsOn publishToMavenLocal
 
 check.dependsOn(integTest)
 
