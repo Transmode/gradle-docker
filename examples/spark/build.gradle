@@ -1,0 +1,28 @@
+buildscript {
+  repositories { jcenter() }
+  dependencies {
+    classpath "se.transmode.gradle:gradle-docker:1.2"
+  }
+}
+
+apply plugin: "java"
+apply plugin: "application"
+apply plugin: "docker"
+
+task wrapper(type: Wrapper) {
+  gradleVersion = "2.12"
+}
+
+sourceCompatibility = 1.8
+group = "se.transmode"
+version = "0.1"
+mainClassName = "se.transmode.example.docker.SparkStart"
+
+repositories { jcenter() }
+dependencies {
+  compile "com.sparkjava:spark-core:2.3"
+}
+
+distDocker {
+  exposePort 4567
+}
