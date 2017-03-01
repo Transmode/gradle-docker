@@ -25,6 +25,7 @@ public interface DockerClient {
      * 
      * @param buildDir the directory from which to build the image
      * @param tag the tag to apply to the image
+     * @param pull wether to pull latest image or not, true enables the pull, false disables pull
      * @return the output of the command
      */
     public String buildImage(File buildDir, String tag, boolean pull);
