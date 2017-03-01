@@ -186,21 +186,26 @@ class Dockerfile {
 
     private void createTarArchive(File tarFile, Closure copySpec) {
         final tmpDir = Files.createTempDir()
-        log.info("Creating tar archive {} from {}", tarFile, tmpDir)
-        /* copy all files to temporary directory */
-        copyCallback {
-            with {
-                into('/') {
-                    with copySpec
+        log.lifecycle("Creating tar archive {} from {}", tarFile, tmpDir)
+        try {
+            /* copy all files to temporary directory */
+            copyCallback {
+                with {
+                    into('/') {
+                        with copySpec
+                    }
                 }
+                into tmpDir
             }
-            into tmpDir
+            /* create tar archive */
+            new AntBuilder().tar(
+                    destfile: tarFile,
+                    basedir: tmpDir
+            )
+        } finally {
+            if (!tmpDir.deleteDir())
+                println "tmpDir $tmpDir not deleted"
         }
-        /* create tar archive */
-        new AntBuilder().tar(
-                destfile: tarFile,
-                basedir: tmpDir
-        )
     }
 
     /**
