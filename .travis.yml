@@ -1,4 +1,4 @@
-group: deprecated-2017Q3
+dist: precise
 language: java
 jdk:
   - openjdk7
