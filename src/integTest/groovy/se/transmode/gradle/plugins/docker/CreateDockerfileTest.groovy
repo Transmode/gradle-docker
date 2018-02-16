@@ -37,6 +37,7 @@ class CreateDockerfileTest {
         // example pulled from "http://docs.docker.io/en/latest/use/builder/#dockerfile-examples"
         task.baseImage 'ubuntu'
         task.maintainer 'Guillaume J. Charmes "guillaume@dotcloud.com"'
+        task.label (maintainer:'Guillaume J. Charmes guillaume@dotcloud.com', version:'1.2.3')
 
         task.runCommand 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
         task.runCommand 'apt-get update'
@@ -70,6 +71,7 @@ class CreateDockerfileTest {
         task.maintainer 'Guillaume J. Charmes "guillaume@dotcloud.com"'
         task.dockerfile {
             from 'ubuntu'
+            label (maintainer:"Guillaume J. Charmes guillaume@dotcloud.com", version:"1.2.3")
             run 'echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list'
             run 'apt-get update'
             run 'apt-get install -y inotify-tools nginx apache2 openssh-server'
@@ -86,4 +88,3 @@ class CreateDockerfileTest {
         assertThat actual, containsInAnyOrder(*expected)
     }
 }
-

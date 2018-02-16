@@ -208,6 +208,12 @@ class Dockerfile {
         }
     }
 
+    void label(Map labels) {
+         if(labels) {
+             instructions.add("LABEL " + labels.collect { k,v -> "\"$k\"=\"$v\"" }.join(' '))
+         }
+    }
+
     /**
      * Get the contents of the Dockerfile row by row as a list of strings.
      *

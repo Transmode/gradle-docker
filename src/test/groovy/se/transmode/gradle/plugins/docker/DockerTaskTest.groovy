@@ -119,16 +119,16 @@ class DockerTaskTest {
     public void testAddFileWithDir() {
         def project = createProject()
         def task = createTask(project)
-        
+
         // Get directory to use
         URL dir_url = ClassLoader.getSystemResource(TEST_TARGET_DIR)
         File dir = new File(dir_url.toURI())
         assertThat(dir.isDirectory(), equalTo(true))
-        
+
         // Add the directory and do the work to move it to the staging directory
         task.addFile(dir)
         task.setupStageDir()
-        
+
         // Confirm that the directory was copied under the staging dir
         File targetDir = new File(task.stageDir, TEST_TARGET_DIR)
         assertThat(targetDir.exists(), is(true))
@@ -164,4 +164,17 @@ class DockerTaskTest {
         assertThat "USER junit".toString(), isIn(task.buildDockerfile().instructions)
     }
 
+    @Test
+    public void defineLabel() {
+       def task = createTask(createProject())
+       task.label(foo: 'bar')
+       assertThat 'LABEL "foo"="bar"', isIn(task.buildDockerfile().instructions)
+    }
+
+    @Test
+    public void defineMultipleLabels() {
+       def task = createTask(createProject())
+       task.label(foo1: 'bar1', foo2: 'bar2')
+       assertThat 'LABEL "foo1"="bar1" "foo2"="bar2"', isIn(task.buildDockerfile().instructions)
+    }
 }

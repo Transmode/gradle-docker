@@ -153,4 +153,11 @@ class LegacyDockerfileMethods implements GroovyInterceptable {
         dockerfile.add(copySpec)
     }
 
+    /**
+    * This method is deprecated. Use the new Dockerfile DSL instead:
+    */
+    @Deprecated
+    void label(Map labels) {
+      dockerfile.label(labels)
+    }
 }
