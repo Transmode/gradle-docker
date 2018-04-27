@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 package se.transmode.gradle.plugins.docker
+
 import com.google.common.annotations.VisibleForTesting
-import com.google.common.io.Files
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -85,6 +85,7 @@ class DockerTask extends DockerTaskBase {
      * Name of base docker image
     */
     String baseImage
+
     /**
      * Return the base docker image.
      *
@@ -95,10 +96,18 @@ class DockerTask extends DockerTaskBase {
      * @return Name of base docker image
      */
     public String getBaseImage() {
-        def defaultImage = project.hasProperty('targetCompatibility') ? JavaBaseImage.imageFor(project.targetCompatibility).imageName : DEFAULT_IMAGE
-        return baseImage ?: (project[DockerPlugin.EXTENSION_NAME].baseImage ?: defaultImage)
+        if (baseImage) {
+            return baseImage
+        }
+        def projectBaseImage = project[DockerPlugin.EXTENSION_NAME].baseImage
+        if (projectBaseImage) {
+            return projectBaseImage
+        } else if (project.hasProperty('targetCompatibility')) {
+            return JavaBaseImage.imageFor(project.targetCompatibility).imageName
+        } else {
+            return DEFAULT_IMAGE
+        }
     }
-
 
     // Dockerfile instructions (ADD, RUN, etc.)
     def instructions

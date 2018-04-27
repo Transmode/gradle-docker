@@ -88,6 +88,16 @@ class DockerTaskTest {
     }
 
     @Test
+    public void projectBaseImageHasPrecedence() {
+        def project = createProject()
+        project[DockerPlugin.EXTENSION_NAME].baseImage = 'dummyImage'
+        project.apply plugin: 'java'
+        project.setProperty('targetCompatibility', JavaVersion.VERSION_1_1)
+        def task = createTask(project)
+        assertThat task.baseImage, is(equalTo('dummyImage'))
+    }
+
+    @Test
     public void overrideBaseImageInExtension() {
         def project = createProject()
         def task = createTask(project)
