@@ -3,7 +3,12 @@ apply plugin: 'application'
 apply plugin: 'docker'
 
 buildscript {
-    repositories { mavenLocal(); jcenter() }
+    repositories {
+      mavenLocal()
+      maven {
+        url = "http://jcenter.bintray.com"
+      }
+    }
     dependencies {
         classpath 'se.transmode.gradle:gradle-docker:1.3-SNAPSHOT'
     }
@@ -18,7 +23,11 @@ group = 'example'
 version = '1.0'
 mainClassName = 'se.transmode.example.docker.JettyMain'
 
-repositories { jcenter() }
+repositories {
+  maven {
+    url = "http://jcenter.bintray.com"
+  } 
+}
 dependencies {
     compile 'org.eclipse.jetty.aggregate:jetty-all:9.0.6.v20130930'
 }

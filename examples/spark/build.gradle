@@ -1,5 +1,9 @@
 buildscript {
-  repositories { jcenter() }
+  repositories {
+    maven {
+      url = "http://jcenter.bintray.com"
+    }
+  }
   dependencies {
     classpath "se.transmode.gradle:gradle-docker:1.2"
   }
@@ -18,7 +22,11 @@ group = "se.transmode"
 version = "0.1"
 mainClassName = "se.transmode.example.docker.SparkStart"
 
-repositories { jcenter() }
+repositories {
+  maven {
+    url = "http://jcenter.bintray.com"
+  } 
+}
 dependencies {
   compile "com.sparkjava:spark-core:2.3"
 }

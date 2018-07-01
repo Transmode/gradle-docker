@@ -1,5 +1,9 @@
 
-repositories { jcenter() }
+repositories {
+  maven { 
+    url = "http://jcenter.bintray.com"
+  }
+}
 
 dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.10.0'
