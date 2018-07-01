@@ -1,7 +1,11 @@
 apply plugin: 'docker'
 
 buildscript {
-    repositories { mavenLocal(); jcenter() }
+    repositories { mavenLocal();
+      maven {
+        url = "http://jcenter.bintray.com"
+      } 
+    }
     dependencies {
         classpath 'se.transmode.gradle:gradle-docker:1.3-SNAPSHOT'
     }
