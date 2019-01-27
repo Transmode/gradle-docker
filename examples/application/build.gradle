@@ -31,7 +31,7 @@ repositories {
 dependencies {
     compile 'org.eclipse.jetty.aggregate:jetty-all:9.0.6.v20130930'
 }
-
+docker.baseImage = 'openjdk:7-jre'
 distDocker {
     dockerfile {
         expose 8080

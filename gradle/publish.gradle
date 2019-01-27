@@ -1,5 +1,5 @@
 apply plugin: 'maven-publish'
-apply plugin: 'artifactory-publish'
+apply plugin: 'com.jfrog.artifactory'
 
 publishing {
     publications {
